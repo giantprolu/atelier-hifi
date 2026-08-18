@@ -56,6 +56,15 @@ const guides = defineCollection({
     // une fiche liste les guides qui la citent, sans double saisie.
     fiches: z.array(z.string()).default([]),
 
+    // Sources. Un guide qui explique un mécanisme sans dire d'où il
+    // tient ses chiffres n'est pas vérifiable, et sur un sujet technique
+    // c'est la seule chose qui sépare une référence d'une recopie. Vide
+    // pour un guide entièrement issu de tes propres relevés — dis-le
+    // alors dans le texte.
+    sources: z
+      .array(z.object({ titre: z.string(), url: z.url() }))
+      .default([]),
+
     // Alimente le composant PlaqueSignaletique.
     plaque: plaque.optional(),
   }),

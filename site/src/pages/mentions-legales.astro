@@ -40,25 +40,24 @@ const MAJ = new Date('2026-08-18');
     <section>
       <div class="filet"><span class="serigraphie">Éditeur du site</span></div>
       <p>
-        Le site <strong>atelierhifi.fr</strong> est édité par
-        REMPLACER_NOM_PRENOM, éditant à titre REMPLACER_PROFESSIONNEL_OU_NON
-        professionnel.
+        Le site <strong>atelierhifi.fr</strong> est édité à titre
+        <strong>non professionnel</strong> par REMPLACER_NOM_OU_PSEUDONYME,
+        également directeur de la publication.
       </p>
       <ul>
-        <li>Adresse : REMPLACER_ADRESSE_POSTALE</li>
         <li>Contact : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></li>
-        <li>Directeur de la publication : REMPLACER_NOM_PRENOM</li>
-        <li>
-          Statut et numéro d'immatriculation, le cas échéant :
-          REMPLACER_SIRET_OU_MENTION_NON_APPLICABLE
-        </li>
+        <li>Activité non commerciale — pas d'immatriculation, pas de TVA</li>
+        <li>Aucune publicité, aucun contenu sponsorisé, aucun lien affilié</li>
       </ul>
       <p class="note">
-        Si tu édites ce site à titre <em>non professionnel</em>, l'article
-        6 III 2° de la LCEN te permet de ne pas publier ton adresse
-        postale, à la double condition d'avoir communiqué ton identité à
-        ton hébergeur et de laisser ici le nom et l'adresse de celui-ci.
-        L'adresse email de contact, elle, reste requise dans tous les cas.
+        L'adresse postale de l'éditeur n'est pas publiée, comme l'autorise
+        l'article 6 III 2° de la LCEN pour une personne physique éditant à
+        titre non professionnel. La contrepartie est double, et les deux
+        volets sont obligatoires : l'identité complète doit avoir été
+        communiquée à l'hébergeur, et le nom et l'adresse de celui-ci
+        doivent figurer ci-dessous. <strong>Communique ton identité à
+        Vercel avant la mise en ligne</strong> — sans cette démarche, la
+        dispense ne s'applique pas et l'adresse redevient obligatoire ici.
       </p>
     </section>
 
@@ -66,14 +65,10 @@ const MAJ = new Date('2026-08-18');
       <div class="filet"><span class="serigraphie">Hébergement</span></div>
 
       <h3>Site éditorial (atelierhifi.fr)</h3>
-      <p>
-        REMPLACER_HEBERGEUR_SITE — au choix Vercel Inc. ou Cloudflare, Inc.
-        selon la plateforme retenue.
-      </p>
       <ul>
-        <li>Raison sociale : REMPLACER_RAISON_SOCIALE</li>
-        <li>Adresse du siège : REMPLACER_ADRESSE_HEBERGEUR</li>
-        <li>Site : REMPLACER_URL_HEBERGEUR</li>
+        <li>Raison sociale : Vercel Inc.</li>
+        <li>Adresse du siège : 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis</li>
+        <li>Site : <a href="https://vercel.com/" rel="external">vercel.com</a></li>
       </ul>
 
       <h3>Forum (forum.atelierhifi.fr)</h3>
@@ -83,20 +78,27 @@ const MAJ = new Date('2026-08-18');
       </p>
       <ul>
         <li>Raison sociale : Hetzner Online GmbH</li>
-        <li>Adresse du siège : REMPLACER_ADRESSE_HETZNER</li>
+        <li>Adresse du siège : Industriestr. 25, 91710 Gunzenhausen, Allemagne</li>
+        <li>Registre du commerce : HRB 6089 (tribunal d'Ansbach) — TVA DE 812871812</li>
         <li>Site : <a href="https://www.hetzner.com/" rel="external">hetzner.com</a></li>
       </ul>
 
       <h3>Médias et sauvegardes (cdn.atelierhifi.fr)</h3>
       <p>
         Les images téléversées sur le forum et les sauvegardes sont
-        stockées sur Cloudflare R2 (Cloudflare, Inc.).
+        stockées sur Cloudflare R2.
       </p>
+      <ul>
+        <li>Raison sociale : Cloudflare, Inc.</li>
+        <li>Adresse du siège : 101 Townsend St, San Francisco, CA 94107, États-Unis</li>
+        <li>Site : <a href="https://www.cloudflare.com/" rel="external">cloudflare.com</a></li>
+      </ul>
 
       <p class="note">
-        Recopie chaque adresse depuis la page légale officielle du
-        prestataire. Ces sièges sociaux changent, et une adresse erronée
-        sur une page de mentions légales n'a aucune valeur.
+        Adresses relevées le 18 août 2026 sur les pages légales des
+        prestataires eux-mêmes. Elles changent : revérifie-les si tu
+        reprends cette page dans un an, une adresse d'hébergeur erronée
+        vide la mention de sa valeur.
       </p>
     </section>
 
@@ -132,8 +134,13 @@ const MAJ = new Date('2026-08-18');
       <p>
         <strong>Sur le site éditorial.</strong> atelierhifi.fr est un site
         statique. Il ne dépose aucun cookie, n'utilise aucun traceur
-        publicitaire et ne collecte aucune donnée personnelle. Aucun
-        formulaire n'y est présent.
+        publicitaire et ne comporte aucun formulaire. Le configurateur de
+        supports calcule entièrement dans ton navigateur : rien de ce que
+        tu y saisis n'est transmis ni conservé. Comme tout hébergeur,
+        Vercel journalise en revanche les données techniques de connexion
+        (adresse IP, horodatage, page demandée) à des fins de sécurité et
+        de mesure de charge, sans que l'éditeur y ait accès autrement
+        qu'agrégées.
       </p>
       <p>
         <strong>Sur le forum.</strong> La création d'un compte sur
@@ -144,16 +151,17 @@ const MAJ = new Date('2026-08-18');
         vendues, ni transmises à des tiers à des fins commerciales.
       </p>
       <ul>
-        <li>Responsable de traitement : REMPLACER_NOM_PRENOM</li>
+        <li>Responsable de traitement : REMPLACER_NOM_OU_PSEUDONYME</li>
         <li>Base légale : consentement, recueilli à l'inscription</li>
         <li>
           Durée de conservation : le temps de vie du compte, puis
           REMPLACER_DUREE après sa suppression
         </li>
         <li>
-          Sous-traitants : Hetzner Online GmbH (hébergement), Brevo
-          (envoi des emails transactionnels), Cloudflare, Inc.
-          (stockage des médias et distribution)
+          Sous-traitants : Vercel Inc. (hébergement du site), Hetzner
+          Online GmbH (hébergement du forum), Brevo (envoi des emails
+          transactionnels), Cloudflare, Inc. (stockage des médias et
+          distribution)
         </li>
       </ul>
       <p>

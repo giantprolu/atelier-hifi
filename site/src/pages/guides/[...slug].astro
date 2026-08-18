@@ -71,6 +71,17 @@ const d = guide.data;
       <Content />
     </div>
 
+    {d.sources.length > 0 && (
+      <aside class="sources colonne-texte">
+        <p class="serigraphie">Sources</p>
+        <ol>
+          {d.sources.map((s) => (
+            <li><a href={s.url} rel="external nofollow">{s.titre}</a></li>
+          ))}
+        </ol>
+      </aside>
+    )}
+
     {fichesLiees.length > 0 && (
       <aside class="renvoi colonne-texte">
         <p class="serigraphie">Fiches matériel associées</p>
@@ -147,4 +158,17 @@ const d = guide.data;
   .renvoi + .renvoi { margin-top: var(--e-5); }
   .renvoi p:first-child { margin-bottom: var(--e-2); }
   .renvoi ul { margin: 0; padding-left: var(--e-5); }
+
+  /* Les sources sont un appareil de note, pas un encart : filet seul,
+     corps réduit, aucune surface. Elles se consultent, elles n'appellent
+     pas le regard. */
+  .sources {
+    margin-top: var(--e-7);
+    padding-top: var(--e-4);
+    border-top: var(--filet) solid var(--alu-fonce);
+    font-size: var(--t-legende);
+  }
+  .sources p:first-child { margin-bottom: var(--e-2); }
+  .sources ol { margin: 0; padding-left: var(--e-5); color: var(--ardoise-clair); }
+  .sources li { margin-bottom: var(--e-1); }
 </style>
