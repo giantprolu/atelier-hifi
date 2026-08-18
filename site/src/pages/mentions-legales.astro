@@ -1,0 +1,229 @@
+---
+import Base from '../layouts/Base.astro';
+
+/**
+ * Mentions légales — obligation de l'article 6 III de la LCEN.
+ *
+ * Les valeurs à compléter portent le marqueur REMPLACER_*, comme dans
+ * infra/app.yml. C'est volontaire : sur une page légale, une adresse
+ * inventée est pire qu'un champ vide. Recopie chaque coordonnée depuis
+ * la page légale du prestataire concerné, pas depuis une mémoire ou un
+ * article de blog.
+ *
+ * Cette page est exclue du sitemap (voir le filtre dans astro.config.mjs).
+ */
+
+const CONTACT = 'REMPLACER_EMAIL_CONTACT';
+const FORUM = 'https://forum.atelierhifi.fr';
+const MAJ = new Date('2026-08-18');
+---
+
+<Base
+  titre="Mentions légales"
+  description="Mentions légales du site atelierhifi.fr : éditeur, hébergeur, propriété intellectuelle et traitement des données personnelles."
+>
+  <div class="page entete">
+    <p class="serigraphie">Informations légales</p>
+    <h1>Mentions légales</h1>
+    <p class="colonne-texte chapo">
+      Informations publiées en application de l'article 6 III de la loi
+      n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie
+      numérique.
+    </p>
+  </div>
+
+  <!-- `.page` est le conteneur centré, `.prose` la colonne de lecture :
+       jamais sur le même élément, sinon le margin-inline:auto de l'un
+       centre la mesure étroite de l'autre au milieu de l'écran. -->
+  <div class="page">
+   <div class="prose">
+    <section>
+      <div class="filet"><span class="serigraphie">Éditeur du site</span></div>
+      <p>
+        Le site <strong>atelierhifi.fr</strong> est édité par
+        REMPLACER_NOM_PRENOM, éditant à titre REMPLACER_PROFESSIONNEL_OU_NON
+        professionnel.
+      </p>
+      <ul>
+        <li>Adresse : REMPLACER_ADRESSE_POSTALE</li>
+        <li>Contact : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></li>
+        <li>Directeur de la publication : REMPLACER_NOM_PRENOM</li>
+        <li>
+          Statut et numéro d'immatriculation, le cas échéant :
+          REMPLACER_SIRET_OU_MENTION_NON_APPLICABLE
+        </li>
+      </ul>
+      <p class="note">
+        Si tu édites ce site à titre <em>non professionnel</em>, l'article
+        6 III 2° de la LCEN te permet de ne pas publier ton adresse
+        postale, à la double condition d'avoir communiqué ton identité à
+        ton hébergeur et de laisser ici le nom et l'adresse de celui-ci.
+        L'adresse email de contact, elle, reste requise dans tous les cas.
+      </p>
+    </section>
+
+    <section>
+      <div class="filet"><span class="serigraphie">Hébergement</span></div>
+
+      <h3>Site éditorial (atelierhifi.fr)</h3>
+      <p>
+        REMPLACER_HEBERGEUR_SITE — au choix Vercel Inc. ou Cloudflare, Inc.
+        selon la plateforme retenue.
+      </p>
+      <ul>
+        <li>Raison sociale : REMPLACER_RAISON_SOCIALE</li>
+        <li>Adresse du siège : REMPLACER_ADRESSE_HEBERGEUR</li>
+        <li>Site : REMPLACER_URL_HEBERGEUR</li>
+      </ul>
+
+      <h3>Forum (forum.atelierhifi.fr)</h3>
+      <p>
+        Le forum est auto-hébergé sur un serveur privé virtuel loué auprès
+        de Hetzner Online GmbH, dans un datacenter situé en Allemagne.
+      </p>
+      <ul>
+        <li>Raison sociale : Hetzner Online GmbH</li>
+        <li>Adresse du siège : REMPLACER_ADRESSE_HETZNER</li>
+        <li>Site : <a href="https://www.hetzner.com/" rel="external">hetzner.com</a></li>
+      </ul>
+
+      <h3>Médias et sauvegardes (cdn.atelierhifi.fr)</h3>
+      <p>
+        Les images téléversées sur le forum et les sauvegardes sont
+        stockées sur Cloudflare R2 (Cloudflare, Inc.).
+      </p>
+
+      <p class="note">
+        Recopie chaque adresse depuis la page légale officielle du
+        prestataire. Ces sièges sociaux changent, et une adresse erronée
+        sur une page de mentions légales n'a aucune valeur.
+      </p>
+    </section>
+
+    <section>
+      <div class="filet"><span class="serigraphie">Propriété intellectuelle</span></div>
+      <p>
+        Les guides, photographies, mesures, schémas et plans publiés sur
+        atelierhifi.fr sont l'œuvre de leur auteur et protégés par le code
+        de la propriété intellectuelle. Leur reproduction sur un autre
+        support nécessite une autorisation écrite préalable.
+      </p>
+      <p>
+        La citation courte avec lien vers la page d'origine reste libre.
+        C'est même souhaitable : ce site existe pour que l'information
+        circule.
+      </p>
+      <p>
+        Les contributions publiées par les membres sur le forum restent la
+        propriété de leurs auteurs. En les publiant, ceux-ci en concèdent
+        la diffusion sur le forum.
+      </p>
+      <p>
+        Les marques citées — Siare, Cabasse, Elipson, Audax, Supravox,
+        Focal, Triangle, Davis, Esart et autres — appartiennent à leurs
+        détenteurs respectifs. Elles ne sont mentionnées qu'à des fins
+        d'identification du matériel décrit. Aucun lien commercial ni
+        partenariat n'existe avec ces sociétés.
+      </p>
+    </section>
+
+    <section>
+      <div class="filet"><span class="serigraphie">Données personnelles</span></div>
+      <p>
+        <strong>Sur le site éditorial.</strong> atelierhifi.fr est un site
+        statique. Il ne dépose aucun cookie, n'utilise aucun traceur
+        publicitaire et ne collecte aucune donnée personnelle. Aucun
+        formulaire n'y est présent.
+      </p>
+      <p>
+        <strong>Sur le forum.</strong> La création d'un compte sur
+        <a href={FORUM}>{FORUM.replace('https://', '')}</a> nécessite une
+        adresse email et un nom d'utilisateur. Le logiciel Discourse
+        enregistre également les adresses IP de connexion, à des fins de
+        sécurité et de lutte contre le spam. Ces données ne sont ni
+        vendues, ni transmises à des tiers à des fins commerciales.
+      </p>
+      <ul>
+        <li>Responsable de traitement : REMPLACER_NOM_PRENOM</li>
+        <li>Base légale : consentement, recueilli à l'inscription</li>
+        <li>
+          Durée de conservation : le temps de vie du compte, puis
+          REMPLACER_DUREE après sa suppression
+        </li>
+        <li>
+          Sous-traitants : Hetzner Online GmbH (hébergement), Brevo
+          (envoi des emails transactionnels), Cloudflare, Inc.
+          (stockage des médias et distribution)
+        </li>
+      </ul>
+      <p>
+        Conformément au règlement (UE) 2016/679 et à la loi Informatique
+        et Libertés, tu disposes d'un droit d'accès, de rectification,
+        d'effacement, de limitation et de portabilité de tes données.
+        Écris à <a href={`mailto:${CONTACT}`}>{CONTACT}</a> pour l'exercer.
+        La suppression du compte est également accessible directement
+        depuis les préférences du forum.
+      </p>
+      <p>
+        En cas de désaccord persistant, tu peux saisir la
+        <a href="https://www.cnil.fr/" rel="external"> CNIL</a>.
+      </p>
+    </section>
+
+    <section>
+      <div class="filet"><span class="serigraphie">Responsabilité</span></div>
+      <p>
+        Les procédures décrites sur ce site concernent du matériel
+        électronique. Certaines interventions exposent à des tensions
+        dangereuses, y compris appareil débranché : les condensateurs de
+        filtrage d'une alimentation restent chargés longtemps après la
+        coupure. Les guides sont des retours d'expérience, pas des notices
+        de constructeur. Chacun intervient sous sa propre responsabilité.
+      </p>
+      <p>
+        Les liens vers des sites tiers sont fournis à titre indicatif.
+        Leur contenu n'engage que leurs éditeurs.
+      </p>
+    </section>
+
+    <p class="maj">
+      Dernière mise à jour :
+      <time datetime={MAJ.toISOString()}>
+        {MAJ.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+      </time>
+    </p>
+   </div>
+  </div>
+</Base>
+
+<style>
+  .entete { padding-block: var(--e-8) var(--e-4); }
+  .chapo { font-size: var(--t-lead); color: var(--ardoise-clair); }
+
+  .prose section:first-of-type .filet { margin-top: var(--e-6); }
+
+  /* Les champs à compléter doivent sauter aux yeux tant qu'ils sont là. */
+  .prose :global(strong),
+  .prose li,
+  .prose p { overflow-wrap: break-word; }
+
+  /* Arête de noyer et non témoin ambré : ce sont des consignes de
+     rédaction, ni un état vivant ni une valeur hors tolérance. L'ambre
+     garde son budget pour les vrais signaux. */
+  .note {
+    padding: var(--e-4) var(--e-5);
+    background: var(--papier);
+    border-left: var(--arete) solid var(--noyer);
+    font-size: var(--t-legende);
+    color: var(--ardoise-clair);
+  }
+
+  .maj {
+    margin-top: var(--e-8);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--alu-fonce);
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    color: var(--ardoise-voile);
+  }
+</style>

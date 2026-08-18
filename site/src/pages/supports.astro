@@ -1,0 +1,492 @@
+---
+import Base from '../layouts/Base.astro';
+import PlaqueSignaletique from '../components/PlaqueSignaletique.astro';
+
+/**
+ * Configurateur de supports.
+ *
+ * Tout le calcul tourne dans le navigateur : rien à envoyer, rien à
+ * stocker, et la page reste un fichier statique. Les valeurs de départ
+ * correspondent à une bibliothèque deux voies typique des années 70 —
+ * l'outil affiche donc un résultat crédible avant même la première
+ * saisie, plutôt qu'une grille de champs vides.
+ */
+
+const champs = [
+  { id: 'largeur', label: 'Largeur', unite: 'mm', valeur: 240, min: 80, max: 600 },
+  { id: 'profondeur', label: 'Profondeur', unite: 'mm', valeur: 280, min: 80, max: 600 },
+  { id: 'hauteur', label: 'Hauteur', unite: 'mm', valeur: 460, min: 120, max: 1200 },
+  { id: 'masse', label: 'Masse', unite: 'kg', valeur: 12, min: 1, max: 60, pas: 0.5 },
+] as const;
+
+const lignesPlaque = [
+  { label: 'Hauteur du pied', valeur: '—', cle: 'hauteur' },
+  { label: 'Colonne', valeur: '—', cle: 'colonne' },
+  { label: 'Longueur de coupe', valeur: '—', cle: 'coupe' },
+  { label: 'Platine', valeur: '—', cle: 'platine' },
+  { label: 'Embase', valeur: '—', cle: 'embase' },
+  { label: 'Masse par pied', valeur: '—', cle: 'masse' },
+  { label: 'Centre de gravité', valeur: '—', cle: 'cdg' },
+  { label: 'Basculement', valeur: '—', cle: 'angle' },
+];
+---
+
+<Base
+  titre="Configurateur de supports d'enceintes"
+  description="Saisis les dimensions et la masse de tes enceintes : l'outil calcule la hauteur du pied, la section de tube, l'embase nécessaire à la stabilité, la nomenclature de débit et un plan coté à emmener chez le métallier."
+>
+  <div class="page entete">
+    <p class="serigraphie">Outil</p>
+    <h1>Configurateur de supports</h1>
+    <p class="colonne-texte chapo">
+      La hauteur découle de l'écoute — tweeter à hauteur d'oreille. La
+      section de tube découle de la masse et de la hauteur. L'embase
+      découle de la stabilité au basculement, calculée sur le centre de
+      gravité réel de l'ensemble, lestage compris.
+    </p>
+    <p class="colonne-texte note">
+      Tout est calculé dans ton navigateur. Aucune donnée n'est envoyée
+      nulle part.
+    </p>
+  </div>
+
+  <div class="page atelier">
+    <form class="saisie" id="saisie" novalidate>
+      <div class="filet"><span class="serigraphie">Ton enceinte</span></div>
+
+      <div class="grille-champs">
+        {champs.map((c) => (
+          <p class="champ">
+            <label for={c.id}>{c.label}</label>
+            <span class="champ__boite">
+              <input
+                type="number"
+                id={c.id}
+                name={c.id}
+                value={c.valeur}
+                min={c.min}
+                max={c.max}
+                step={'pas' in c ? c.pas : 1}
+                inputmode="decimal"
+                required
+              />
+              <span class="champ__unite" aria-hidden="true">{c.unite}</span>
+            </span>
+          </p>
+        ))}
+
+        <p class="champ champ--large">
+          <label for="hauteurTweeter">Axe du tweeter depuis le dessous de l'enceinte</label>
+          <span class="champ__boite">
+            <input
+              type="number"
+              id="hauteurTweeter"
+              name="hauteurTweeter"
+              value="368"
+              min="10"
+              max="1200"
+              inputmode="decimal"
+              required
+            />
+            <span class="champ__unite" aria-hidden="true">mm</span>
+          </span>
+          <span class="aide">
+            Se recalcule tout seul à 80 % de la hauteur tant que tu n'y touches
+            pas. Mesure-le : c'est la cote qui décide de tout le reste.
+          </span>
+        </p>
+      </div>
+
+      <div class="filet"><span class="serigraphie">Ton écoute</span></div>
+
+      <div class="grille-champs">
+        <p class="champ">
+          <label for="hauteurOreille">Hauteur d'oreille assis</label>
+          <span class="champ__boite">
+            <input
+              type="number"
+              id="hauteurOreille"
+              name="hauteurOreille"
+              value="1000"
+              min="600"
+              max="1400"
+              inputmode="decimal"
+              required
+            />
+            <span class="champ__unite" aria-hidden="true">mm</span>
+          </span>
+          <span class="aide">
+            Mesure-la depuis ton siège d'écoute, pas depuis une moyenne. Un
+            canapé bas et une chaise de bureau, c'est 15 cm d'écart.
+          </span>
+        </p>
+
+        <p class="champ champ--case">
+          <label for="sable">
+            <input type="checkbox" id="sable" name="sable" checked />
+            Colonne lestée au sable sec
+          </label>
+          <span class="aide">
+            Le lestage abaisse le centre de gravité et tue la résonance du
+            tube. C'est le kilo de stabilité le moins cher qui existe.
+          </span>
+        </p>
+      </div>
+    </form>
+
+    <div class="sortie">
+      <div class="filet"><span class="serigraphie">Ce qu'il te faut</span></div>
+
+      <PlaqueSignaletique
+        marque="Pied d'enceinte"
+        modele="Acier soudé"
+        annees="Cotes en mm"
+        lignes={lignesPlaque}
+      />
+
+      <div id="alertes" class="alertes" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <section class="page">
+    <div class="filet"><span class="serigraphie">Débit — pour la paire</span></div>
+    <!-- Sous 640px le tableau pivote (voir .tableau dans global.css) :
+         chaque ligne devient un bloc, la quantité passe en paire
+         clé/valeur. Aucun défilement horizontal sur une nomenclature
+         qu'on lit debout dans un atelier. -->
+    <table class="tableau nomenclature">
+      <thead>
+        <tr>
+          <th scope="col">Désignation</th>
+          <th scope="col" class="nombre">Quantité</th>
+        </tr>
+      </thead>
+      <tbody id="nomenclature"></tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="filet"><span class="serigraphie">Plan coté</span></div>
+    <p class="colonne-texte">
+      Élévation de face et vue de dessus de l'embase, cotes en millimètres,
+      à l'échelle réelle. Le SVG s'imprime tel quel : c'est le fichier à
+      envoyer au métallier avec la nomenclature ci-dessus.
+    </p>
+    <p>
+      <a id="telecharger" class="bouton bouton--vif" download href="#">
+        Télécharger le plan SVG
+      </a>
+    </p>
+    <div id="plan" class="plan"></div>
+  </section>
+
+  <section class="page">
+    <div class="filet"><span class="serigraphie">Avant de commander</span></div>
+    <div class="colonne-texte">
+      <ul>
+        <li>
+          Vérifie la disponibilité de la section de tube chez ton
+          fournisseur avant de valider le plan. Le 80 × 80 × 3 se trouve
+          partout, le 70 × 70 beaucoup moins.
+        </li>
+        <li>
+          Fais percer la platine supérieure <em>avant</em> soudure — le
+          trou de remplissage et les trous de fixation. Après, il faut
+          démonter.
+        </li>
+        <li>
+          Compte la peinture : dégraissage, apprêt époxy, finition. Un pied
+          brut rouille en une saison dans une pièce non chauffée.
+        </li>
+        <li>
+          Les cotes supposent une enceinte posée à plat sur la platine. Si
+          tu prévois un joint amortissant, retire son épaisseur de la
+          hauteur du pied.
+        </li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { calculer, nomenclature } from '../lib/supports';
+  import type { Enceinte, Options } from '../lib/supports';
+  import { tracerPlan } from '../lib/plan-supports';
+
+  function el<T extends HTMLElement>(selecteur: string): T {
+    const noeud = document.querySelector<T>(selecteur);
+    if (!noeud) throw new Error(`Élément introuvable : ${selecteur}`);
+    return noeud;
+  }
+
+  const saisie = el<HTMLFormElement>('#saisie');
+  const zoneAlertes = el<HTMLDivElement>('#alertes');
+  const corpsNomenclature = el<HTMLTableSectionElement>('#nomenclature');
+  const zonePlan = el<HTMLDivElement>('#plan');
+  const lienPlan = el<HTMLAnchorElement>('#telecharger');
+  const champTweeter = el<HTMLInputElement>('#hauteurTweeter');
+  const champHauteur = el<HTMLInputElement>('#hauteur');
+
+  // Tant que l'utilisateur n'a pas saisi sa vraie cote de tweeter, on la
+  // suit à 80 % de la hauteur d'enceinte. Dès qu'il y touche, on ne
+  // l'écrase plus : écraser une valeur mesurée serait le pire des bugs
+  // sur un outil dont c'est la cote la plus sensible.
+  let tweeterAutomatique = true;
+  champTweeter.addEventListener('input', () => {
+    tweeterAutomatique = false;
+  });
+
+  const nombre = (nom: string): number => {
+    const champ = saisie.elements.namedItem(nom);
+    return champ instanceof HTMLInputElement ? champ.valueAsNumber : NaN;
+  };
+
+  let urlPlan: string | null = null;
+
+  function rendre(): void {
+    if (tweeterAutomatique) {
+      const h = champHauteur.valueAsNumber;
+      if (Number.isFinite(h) && h > 0) champTweeter.value = Math.round(h * 0.8).toString();
+    }
+
+    const enceinte: Enceinte = {
+      largeur: nombre('largeur'),
+      profondeur: nombre('profondeur'),
+      hauteur: nombre('hauteur'),
+      masse: nombre('masse'),
+      hauteurTweeter: nombre('hauteurTweeter'),
+    };
+    const options: Options = {
+      hauteurOreille: nombre('hauteurOreille'),
+      sable: el<HTMLInputElement>('#sable').checked,
+    };
+
+    const valeurs = [...Object.values(enceinte), options.hauteurOreille];
+    if (valeurs.some((v) => !Number.isFinite(v) || v <= 0)) {
+      zoneAlertes.innerHTML =
+        '<p class="alerte alerte--attente">Complète les cotes pour lancer le calcul.</p>';
+      return;
+    }
+
+    const r = calculer(enceinte, options);
+
+    const cotes: Record<string, string> = {
+      hauteur: `${r.hauteur} mm`,
+      colonne: `${r.colonne.cote} × ${r.colonne.cote} × ${r.colonne.epaisseur}`,
+      coupe: `${r.longueurColonne} mm`,
+      platine: `${r.platine.largeur} × ${r.platine.profondeur} × ${r.platine.epaisseur}`,
+      embase: `${r.embase.largeur} × ${r.embase.profondeur} × ${r.embase.epaisseur}`,
+      masse: `${r.massePied.toFixed(1)} kg`,
+      cdg: `${Math.round(r.centreGravite)} mm`,
+      angle: `${r.angleBasculement.toFixed(1)}°`,
+    };
+    for (const [cle, valeur] of Object.entries(cotes)) {
+      const cible = document.querySelector(`[data-cle="${cle}"]`);
+      if (cible) cible.textContent = valeur;
+    }
+
+    zoneAlertes.innerHTML = '';
+    for (const texte of r.alertes) {
+      const p = document.createElement('p');
+      p.className = 'alerte';
+      p.textContent = texte;
+      zoneAlertes.append(p);
+    }
+
+    corpsNomenclature.replaceChildren();
+    for (const ligne of nomenclature(r, options)) {
+      const tr = document.createElement('tr');
+
+      const td = document.createElement('td');
+      const designation = document.createElement('span');
+      designation.className = 'designation';
+      designation.textContent = ligne.designation;
+      td.append(designation);
+      if (ligne.detail) {
+        const detail = document.createElement('span');
+        detail.className = 'detail';
+        detail.textContent = ligne.detail;
+        td.append(detail);
+      }
+
+      const tdq = document.createElement('td');
+      tdq.className = 'nombre';
+      tdq.dataset.libelle = 'Quantité';
+      tdq.textContent = ligne.quantite;
+
+      tr.append(td, tdq);
+      corpsNomenclature.append(tr);
+    }
+
+    const svg = tracerPlan(enceinte, options, r);
+    zonePlan.innerHTML = svg;
+
+    // Un object URL par rendu : on révoque le précédent, sinon chaque
+    // frappe au clavier laisse un blob derrière elle.
+    if (urlPlan) URL.revokeObjectURL(urlPlan);
+    urlPlan = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+    lienPlan.href = urlPlan;
+    lienPlan.download = `pied-enceinte-${enceinte.largeur}x${enceinte.profondeur}-h${r.hauteur}.svg`;
+  }
+
+  saisie.addEventListener('input', rendre);
+  rendre();
+</script>
+
+<style>
+  .entete { padding-block: var(--e-8) var(--e-4); }
+  .chapo { font-size: var(--t-lead); color: var(--ardoise-clair); }
+  .note {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    color: var(--ardoise-voile);
+  }
+
+  .atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--e-7);
+    align-items: start;
+  }
+
+  .grille-champs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--e-4) var(--e-5);
+  }
+
+  .champ { display: flex; flex-direction: column; gap: var(--e-2); margin: 0; }
+  .champ--large { grid-column: 1 / -1; }
+  .champ--case { grid-column: 1 / -1; }
+
+  /* Étiquette de champ : mono et non Archivo. La planche réserve les
+     capitales Archivo aux titres et aux libellés de boutons. */
+  .champ label {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    font-weight: 500;
+    letter-spacing: var(--ls-data-mini);
+    text-transform: uppercase;
+    color: var(--ardoise);
+  }
+
+  /* L'unité vit dans la boîte, en suffixe, jamais dans la saisie : on
+     tape « 240 », pas « 240 mm ». Le cadre porte donc la bordure et
+     l'anneau de focus, l'input n'est plus qu'un champ nu à l'intérieur. */
+  .champ__boite {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    min-height: var(--cible);
+    padding-inline: var(--e-3);
+    background: var(--papier);
+    border: var(--filet) solid var(--ardoise);
+    border-radius: var(--rayon);
+  }
+  .champ__boite:focus-within {
+    outline: var(--filet-fort) solid var(--focus);
+    outline-offset: 2px;
+  }
+  .champ__boite:has(:invalid) { border: var(--filet-fort) solid var(--danger); }
+
+  .champ input[type='number'] {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--f-data);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ardoise);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    outline: none;
+  }
+  .champ__unite {
+    flex: none;
+    font-family: var(--f-data);
+    font-size: var(--t-legende);
+    color: var(--ardoise-voile);
+  }
+
+  /* Une case à cocher se lit comme une phrase, pas comme une étiquette
+     de champ : retour à la fonte de corps. */
+  .champ--case label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--e-3);
+    min-height: var(--cible);
+    font-family: var(--f-corps);
+    font-weight: 400;
+    font-size: var(--t-legende);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ardoise);
+    cursor: pointer;
+  }
+  .champ--case input { accent-color: var(--noyer); width: 16px; height: 16px; }
+
+  .aide {
+    font-size: var(--t-data-mini);
+    line-height: 1.5;
+    color: var(--ardoise-voile);
+  }
+
+  /* Encart à deux tons. L'ambre est ici dans son emploi n° 2 — une valeur
+     hors tolérance, constat réversible et informatif — et non du danger :
+     rien n'a échoué, rien n'est cliquable. */
+  .alertes:empty { display: none; }
+  .alerte {
+    margin: var(--e-4) 0 0;
+    padding: var(--e-3) var(--e-4);
+    background: var(--papier);
+    border: var(--filet) solid var(--ardoise);
+    border-left: 4px solid var(--temoin);
+    font-size: var(--t-legende);
+    color: var(--ardoise-clair);
+  }
+  /* L'attente n'est pas un signal : filet neutre, pas de témoin. */
+  .alerte--attente {
+    border-color: var(--alu-fonce);
+    border-left-color: var(--alu-fonce);
+  }
+
+  /* Le cadre, l'en-tête et le pivot sous 640px viennent de .tableau dans
+     global.css. Il ne reste ici que la typographie des deux colonnes. */
+  .nomenclature :global(.designation) {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: var(--t-legende);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nomenclature :global(.detail) {
+    display: block;
+    margin-top: var(--e-1);
+    max-width: 62ch;
+    font-size: var(--t-legende);
+    color: var(--ardoise-voile);
+  }
+
+  /* Le plan garde son défilement : ce n'est pas un tableau de données
+     mais un dessin coté, et le réduire à 358px le rend illisible. Le
+     bouton de téléchargement au-dessus reste la sortie principale. */
+  .plan {
+    margin-top: var(--e-5);
+    overflow-x: auto;
+    border: var(--filet) solid var(--ardoise);
+    background: #fff;
+    padding: var(--e-4);
+  }
+  .plan :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-width: 520px;
+  }
+
+  @media (max-width: 900px) {
+    .atelier { grid-template-columns: 1fr; gap: var(--e-6); }
+  }
+</style>

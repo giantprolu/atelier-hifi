@@ -1,0 +1,111 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PlaqueSignaletique from '../../components/PlaqueSignaletique.astro';
+
+export async function getStaticPaths() {
+  const fiches = await getCollection('fiches', ({ data }) => !data.brouillon);
+  const guides = await getCollection('guides', ({ data }) => !data.brouillon);
+
+  return fiches.map((fiche) => ({
+    params: { slug: fiche.id },
+    props: {
+      fiche,
+      // Lien inverse calculé ici plutôt que saisi dans le frontmatter de la
+      // fiche : le guide déclare la fiche qu'il traite, la fiche récupère
+      // les guides qui la citent. Une seule saisie, jamais désynchronisée.
+      guidesLies: guides.filter((g) => g.data.fiches.includes(fiche.id)),
+    },
+  }));
+}
+
+const { fiche, guidesLies } = Astro.props;
+const { Content } = await render(fiche);
+const d = fiche.data;
+const titre = `${d.plaque.marque} ${d.plaque.modele}`;
+---
+
+<Base
+  titre={titre}
+  description={d.resume}
+  type="article"
+  datePublication={d.date}
+  dateModification={d.misAJour}
+>
+  <article class="page article">
+    <header class="article__entete colonne-texte">
+      <p class="serigraphie">Fiche matériel — {d.type}</p>
+      <h1>{titre}</h1>
+      <p class="article__resume">{d.resume}</p>
+    </header>
+
+    <div class="colonne-texte">
+      <PlaqueSignaletique
+        marque={d.plaque.marque}
+        modele={d.plaque.modele}
+        annees={d.plaque.annees}
+        lignes={d.plaque.lignes}
+      />
+
+      <!-- La provenance des chiffres est affichée juste sous la plaque, pas
+           reléguée en pied de page. C'est ce qui distingue une fiche d'une
+           recopie, et le lecteur doit pouvoir en juger tout de suite. -->
+      <p class="provenance">
+        <span class="serigraphie">Provenance des relevés</span>
+        {d.sourceReleves}
+      </p>
+    </div>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {guidesLies.length > 0 && (
+      <aside class="renvoi colonne-texte">
+        <p class="serigraphie">Guides sur ce matériel</p>
+        <ul>
+          {guidesLies.map((g) => (
+            <li><a href={`/guides/${g.id}/`}>{g.data.titre}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    {d.sujetForum && (
+      <aside class="renvoi colonne-texte">
+        <p class="serigraphie">Compléter cette fiche</p>
+        <p>
+          Une variante de série, une valeur relevée différente, une photo de
+          l'étiquette : le fil de discussion de cette fiche est ouvert. Les
+          corrections argumentées remontent ici.
+        </p>
+        <a href={d.sujetForum} class="bouton bouton--vif">
+          Voir la discussion
+        </a>
+      </aside>
+    )}
+  </article>
+</Base>
+
+<style>
+  .article { padding-block: var(--e-7); }
+  .article__entete { margin-bottom: var(--e-6); }
+  .article__resume { font-size: var(--t-lead); color: var(--ardoise-clair); }
+
+  .provenance {
+    margin-top: calc(-1 * var(--e-4));
+    font-size: var(--t-legende);
+    color: var(--ardoise-clair);
+  }
+  .provenance .serigraphie { display: block; margin-bottom: var(--e-1); }
+
+  .renvoi {
+    margin-top: var(--e-7);
+    padding: var(--e-5);
+    background: var(--papier);
+    border: 1px solid var(--alu-fonce);
+    border-left: 3px solid var(--noyer);
+  }
+  .renvoi p:first-child { margin-bottom: var(--e-2); }
+  .renvoi ul { margin: 0; padding-left: var(--e-5); }
+</style>

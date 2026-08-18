@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+
+# Cache des polices téléchargées par `npm run og`. Les .ttf viennent de
+# Google Fonts, on ne les versionne pas.
+site/scripts/.polices/
+
+# Secrets — ne doivent JAMAIS être versionnés.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+app.yml.local
+.vercel/
+.wrangler/

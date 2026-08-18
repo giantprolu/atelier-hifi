@@ -1,0 +1,150 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PlaqueSignaletique from '../../components/PlaqueSignaletique.astro';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.brouillon);
+  const fiches = await getCollection('fiches', ({ data }) => !data.brouillon);
+
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: {
+      guide,
+      // On ne garde que les fiches réellement publiées : un guide peut
+      // citer une fiche encore en brouillon sans produire de lien mort.
+      fichesLiees: guide.data.fiches
+        .map((id) => fiches.find((f) => f.id === id))
+        .filter((f) => f !== undefined),
+    },
+  }));
+}
+
+const { guide, fichesLiees } = Astro.props;
+const { Content } = await render(guide);
+const d = guide.data;
+---
+
+<Base
+  titre={d.titre}
+  description={d.resume}
+  type="article"
+  datePublication={d.date}
+  dateModification={d.misAJour}
+>
+  <article class="page article">
+    <header class="article__entete colonne-texte">
+      <p class="serigraphie">{d.rubrique}</p>
+      <h1>{d.titre}</h1>
+      <p class="article__resume">{d.resume}</p>
+
+      <dl class="article__meta">
+        <div>
+          <dt>Publié</dt>
+          <dd>
+            <time datetime={d.date.toISOString()}>
+              {d.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </time>
+          </dd>
+        </div>
+        {d.duree && (
+          <div><dt>Durée</dt><dd>{d.duree}</dd></div>
+        )}
+        {d.difficulte && (
+          <div><dt>Niveau</dt><dd>{d.difficulte}</dd></div>
+        )}
+      </dl>
+    </header>
+
+    {d.plaque && (
+      <div class="colonne-texte">
+        <PlaqueSignaletique
+          marque={d.plaque.marque}
+          modele={d.plaque.modele}
+          annees={d.plaque.annees}
+          lignes={d.plaque.lignes}
+        />
+      </div>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {fichesLiees.length > 0 && (
+      <aside class="renvoi colonne-texte">
+        <p class="serigraphie">Fiches matériel associées</p>
+        <ul>
+          {fichesLiees.map((f) => (
+            <li>
+              <a href={`/fiches/${f.id}/`}>
+                {f.data.plaque.marque} {f.data.plaque.modele}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    <!-- Renvoi vers le fil de discussion. C'est la moitié du maillage :
+         le guide capte la recherche, le forum capte la conversation. -->
+
+    {d.sujetForum && (
+      <aside class="renvoi colonne-texte">
+        <p class="serigraphie">Une question sur ce montage ?</p>
+        <p>
+          Le fil de discussion de ce guide est ouvert sur le forum. C'est
+          là que les cas particuliers et les variantes de modèle se règlent.
+        </p>
+        <a href={d.sujetForum} class="bouton bouton--vif">
+          Voir la discussion
+        </a>
+      </aside>
+    )}
+  </article>
+</Base>
+
+<style>
+  .article { padding-block: var(--e-7); }
+  .article__entete { margin-bottom: var(--e-6); }
+  .article__resume {
+    font-size: var(--t-lead);
+    color: var(--ardoise-clair);
+  }
+
+  .article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-6);
+    margin: var(--e-5) 0 0;
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--alu-fonce);
+  }
+  .article__meta div { display: flex; flex-direction: column; gap: 2px; }
+  /* Étiquette en mono : Archivo est réservé aux titres et aux boutons. */
+  .article__meta dt {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    font-weight: 500;
+    letter-spacing: var(--ls-data-mini);
+    text-transform: uppercase;
+    color: var(--ardoise-voile);
+  }
+  .article__meta dd {
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: var(--t-data);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .renvoi {
+    margin-top: var(--e-7);
+    padding: var(--e-5);
+    background: var(--papier);
+    border: 1px solid var(--alu-fonce);
+    border-left: 3px solid var(--noyer);
+  }
+  .renvoi + .renvoi { margin-top: var(--e-5); }
+  .renvoi p:first-child { margin-bottom: var(--e-2); }
+  .renvoi ul { margin: 0; padding-left: var(--e-5); }
+</style>

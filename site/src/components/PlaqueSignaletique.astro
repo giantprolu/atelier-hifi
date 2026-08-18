@@ -1,0 +1,286 @@
+---
+/**
+ * PlaqueSignaletique — l'objet signature du site.
+ *
+ * Reproduit la plaque rivetée au dos d'une enceinte ou d'un ampli : fond
+ * d'ardoise brossée, sérigraphie mono, filets pointillés, valeurs alignées
+ * à droite sur une grille stricte.
+ *
+ * Pourquoi ça plutôt qu'un tableau : sur ce sujet, la plaque EST le
+ * document de référence. Les gens la photographient pour identifier un
+ * modèle. La reproduire donne au lecteur l'objet qu'il cherchait déjà.
+ *
+ * À 390px la plaque MUTE, elle ne rétrécit pas : les quatre vis et le
+ * cadre disparaissent — à cette largeur ils volent la place des valeurs.
+ * Restent le fond d'ardoise, les filets pointillés, l'arête de noyer à
+ * gauche, et une colonne unique où la valeur passe à 15px.
+ */
+interface Ligne {
+  label: string;
+  valeur: string;
+  /**
+   * Identifiant stable posé en `data-cle` sur la valeur. Sert au
+   * configurateur, qui réécrit les valeurs côté client : cibler une clé
+   * est fiable, cibler le troisième `dd` de la liste ne l'est pas.
+   */
+  cle?: string;
+}
+
+interface Props {
+  marque: string;
+  modele: string;
+  annees?: string;
+  lignes: Ligne[];
+  /**
+   * Constat de mesure hors tolérance. C'est le seul emploi du témoin
+   * ambré dans la plaque, et il porte du texte parce qu'on est sur fond
+   * d'ardoise (6.41:1) — jamais sur clair.
+   */
+  alerte?: string;
+}
+
+const { marque, modele, annees, lignes, alerte } = Astro.props;
+
+/** Nombre de lignes visibles avant dépliage, en colonne unique. */
+const SEUIL = 5;
+const replies = Math.max(0, lignes.length - SEUIL);
+---
+
+<aside class="plaque" aria-label={`Caractéristiques ${marque} ${modele}`}>
+  <div class="plaque__vis" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="plaque__entete">
+    <div class="plaque__identite">
+      <span class="plaque__marque">
+        {marque}{annees && <span class="plaque__annees-repli"> · {annees}</span>}
+      </span>
+      <span class="plaque__modele">{modele}</span>
+    </div>
+    {annees && <span class="plaque__annees">{annees}</span>}
+  </div>
+
+  <dl class="plaque__grille">
+    {lignes.map((l, i) => (
+      <div class="plaque__ligne" data-repli={i >= SEUIL ? '' : undefined}>
+        <dt>{l.label}</dt>
+        <dd data-cle={l.cle}>{l.valeur}</dd>
+      </div>
+    ))}
+  </dl>
+
+  {replies > 0 && (
+    <button type="button" class="plaque__depli" data-replies={replies}>
+      {replies} valeur{replies > 1 ? 's' : ''} de plus ↓
+    </button>
+  )}
+
+  {alerte && (
+    <p class="plaque__alerte">
+      <span class="temoin" aria-hidden="true"></span>{alerte}
+    </p>
+  )}
+</aside>
+
+<script>
+  // Le dépliage n'existe qu'en colonne unique : au-dessus de 640px toutes
+  // les valeurs tiennent sur deux colonnes et le bouton est masqué en CSS.
+  for (const plaque of document.querySelectorAll<HTMLElement>('.plaque')) {
+    const bouton = plaque.querySelector<HTMLButtonElement>('.plaque__depli');
+    if (!bouton) continue;
+
+    const nombre = bouton.dataset.replies ?? '';
+    bouton.addEventListener('click', () => {
+      const deplie = plaque.classList.toggle('plaque--deplie');
+      bouton.textContent = deplie
+        ? 'Replier ↑'
+        : `${nombre} valeur${Number(nombre) > 1 ? 's' : ''} de plus ↓`;
+    });
+  }
+</script>
+
+<style>
+  .plaque {
+    /* Cerclage des vis et filets pointillés : une valeur intermédiaire
+       entre --panneau-filet et --ardoise-tenu que la planche emploie sans
+       la nommer. Confinée ici, elle ne se répand pas. */
+    --plaque-filet: #4a5057;
+    /* L'acier du schéma sombre, quel que soit le schéma de la page : la
+       plaque est toujours une surface d'ardoise, et --acier clair
+       (#2a6280) y serait illisible. */
+    --plaque-acier: #6fb4d4;
+
+    position: relative;
+    margin-block: var(--e-6);
+    padding: var(--e-5) var(--e-5) var(--e-4);
+    background: var(--panneau);
+    /* Brossage vertical, pas de 4px. Volontairement à la limite du
+       perceptible — si on la voit, c'est raté. */
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.035) 0 1px,
+      transparent 1px 4px
+    );
+    border: var(--filet) solid var(--panneau-creux);
+    color: var(--panneau-texte);
+  }
+
+  /* --- Les quatre vis ---------------------------------------------------
+     Le détail qui fait que la plaque se lit comme un objet et pas comme un
+     encadré. Un aplat cerclé, pas un dégradé : la façade est mate. */
+
+  .plaque__vis span {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--panneau-creux);
+    border: var(--filet) solid var(--plaque-filet);
+  }
+  .plaque__vis span:nth-child(1) { top: 8px;    left: 8px; }
+  .plaque__vis span:nth-child(2) { top: 8px;    right: 8px; }
+  .plaque__vis span:nth-child(3) { bottom: 8px; left: 8px; }
+  .plaque__vis span:nth-child(4) { bottom: 8px; right: 8px; }
+
+  /* --- En-tête ---------------------------------------------------------- */
+
+  .plaque__entete {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--e-4);
+    padding-bottom: var(--e-3);
+    border-bottom: var(--filet) solid var(--panneau-filet);
+  }
+
+  .plaque__identite { display: flex; flex-direction: column; gap: var(--e-1); }
+
+  .plaque__marque {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--panneau-voile);
+  }
+  .plaque__annees-repli { display: none; }
+
+  .plaque__modele {
+    font-family: var(--f-display);
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--panneau-texte);
+  }
+
+  .plaque__annees {
+    flex: none;
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ardoise);
+    background: var(--alu-fonce);
+    padding: var(--e-1) var(--e-2);
+  }
+
+  /* --- Grille de valeurs ------------------------------------------------ */
+
+  .plaque__grille {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 var(--e-6);
+    margin: var(--e-3) 0 0;
+  }
+
+  .plaque__ligne {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--e-3);
+    padding: 7px 0;
+    border-bottom: var(--filet) dotted var(--plaque-filet);
+  }
+
+  .plaque__ligne dt {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    font-weight: 500;
+    letter-spacing: var(--ls-data-mini);
+    text-transform: uppercase;
+    color: var(--panneau-voile);
+  }
+
+  /* L'étiquette peut passer à la ligne, jamais la valeur : « 612 mm »
+     coupé en « 612 » puis « mm » est une cote qu'on relit deux fois. */
+  .plaque__ligne dd {
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: var(--t-data);
+    font-weight: var(--fw-data);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--panneau-texte);
+  }
+
+  .plaque__depli { display: none; }
+
+  /* --- Constat hors tolérance ------------------------------------------- */
+
+  .plaque__alerte {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin: var(--e-3) 0 0;
+    padding-top: var(--e-3);
+    border-top: var(--filet) solid var(--panneau-filet);
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    letter-spacing: 0.06em;
+    color: var(--temoin);
+  }
+
+  /* --- Colonne unique : la plaque mute ---------------------------------- */
+
+  @media (max-width: 640px) {
+    .plaque {
+      padding: var(--e-4);
+      border: 0;
+      border-left: var(--arete) solid var(--noyer);
+    }
+    .plaque__vis { display: none; }
+
+    .plaque__entete { flex-direction: column; gap: 3px; padding-bottom: var(--e-3); }
+    .plaque__identite { gap: 3px; }
+    .plaque__annees { display: none; }
+    .plaque__annees-repli { display: inline; }
+    .plaque__modele { letter-spacing: 0.14em; }
+
+    .plaque__grille { grid-template-columns: 1fr; gap: 0; margin-top: var(--e-2); }
+    .plaque__ligne { padding: 9px 0; gap: var(--e-3); }
+    .plaque__ligne dd { font-size: 15px; }
+
+    .plaque:not(.plaque--deplie) .plaque__ligne[data-repli] { display: none; }
+
+    .plaque__depli {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: var(--cible);
+      margin-top: var(--e-2);
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-top: var(--filet) solid var(--panneau-filet);
+      font-family: var(--f-data);
+      font-size: var(--t-legende);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--plaque-acier);
+      cursor: pointer;
+    }
+  }
+</style>

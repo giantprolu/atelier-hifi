@@ -1,0 +1,128 @@
+##
+## Discourse — configuration de production
+## Cible : forum.atelierhifi.fr sur VPS Hetzner CAX21 (ARM64, 4 Go)
+##
+## Ce fichier remplace /var/discourse/containers/app.yml sur le serveur.
+## Après TOUTE modification :  cd /var/discourse && ./launcher rebuild app
+##
+## ATTENTION : ne jamais committer ce fichier avec les vrais secrets.
+## Voir infra/RUNBOOK.md §4 pour la procédure d'injection des secrets.
+##
+
+templates:
+  - "templates/postgres.template.yml"
+  - "templates/redis.template.yml"
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+  # Let's Encrypt intégré. Fonctionne uniquement si le DNS pointe
+  # DIRECTEMENT sur le VPS (Cloudflare en mode "DNS only" / nuage gris).
+  # Si tu passes le sous-domaine en proxy Cloudflare (nuage orange), le
+  # challenge HTTP-01 échoue et le conteneur boucle. C'est LE piège classique.
+  - "templates/web.ssl.template.yml"
+  - "templates/web.letsencrypt.ssl.template.yml"
+
+expose:
+  - "80:80"
+  - "443:443"
+
+params:
+  db_default_text_search_config: "pg_catalog.french"
+
+  # Taille du shared_buffers Postgres.
+  # Règle : ~25 % de la RAM. 4 Go de RAM -> 1024MB.
+  db_shared_buffers: "1024MB"
+  db_work_mem: "40MB"
+
+env:
+  LC_ALL: fr_FR.UTF-8
+  LANG: fr_FR.UTF-8
+  LANGUAGE: fr_FR.UTF-8
+
+  # Nombre de workers Unicorn.
+  # 2 vCPU -> 3 workers. Au-delà tu satures la RAM avant le CPU.
+  UNICORN_WORKERS: 3
+
+  DISCOURSE_DEFAULT_LOCALE: fr
+
+  ## --- Domaine -------------------------------------------------------
+  DISCOURSE_HOSTNAME: forum.atelierhifi.fr
+
+  ## --- Let's Encrypt --------------------------------------------------
+  LETSENCRYPT_ACCOUNT_EMAIL: admin@atelierhifi.fr
+
+  ## --- Compte admin initial -------------------------------------------
+  # Cet email reçoit l'invitation admin au premier démarrage.
+  DISCOURSE_DEVELOPER_EMAILS: "nathnathchav@gmail.com"
+
+  ## --- SMTP (Brevo) ----------------------------------------------------
+  # OBLIGATOIRE. Sans SMTP fonctionnel, personne ne peut s'inscrire :
+  # Discourse exige une validation par email. À tester AVANT l'ouverture
+  # publique (voir RUNBOOK §6).
+  #
+  # Le "login" Brevo n'est PAS ton email de compte : c'est la valeur
+  # affichée dans Brevo > SMTP & API > SMTP > Login.
+  DISCOURSE_SMTP_ADDRESS: smtp-relay.brevo.com
+  DISCOURSE_SMTP_PORT: 587
+  DISCOURSE_SMTP_USER_NAME: "REMPLACER_LOGIN_BREVO"
+  DISCOURSE_SMTP_PASSWORD: "REMPLACER_CLE_SMTP_BREVO"
+  DISCOURSE_SMTP_ENABLE_START_TLS: true
+  DISCOURSE_SMTP_DOMAIN: atelierhifi.fr
+  DISCOURSE_NOTIFICATION_EMAIL: forum@atelierhifi.fr
+
+  ## --- Stockage objet Cloudflare R2 (uploads + backups) ----------------
+  # Pourquoi : les images d'enceintes démontées pèsent lourd et rempliront
+  # le disque du VPS en quelques mois. R2 a l'egress gratuit, contrairement
+  # à S3 ou aux object storages Hetzner/DO qui facturent un minimum mensuel.
+  #
+  # <ACCOUNT_ID> = ton ID de compte Cloudflare (visible dans l'URL du dashboard).
+  DISCOURSE_USE_S3: true
+  DISCOURSE_S3_INSTALL_CORS_RULE: false
+  DISCOURSE_S3_ENDPOINT: https://REMPLACER_ACCOUNT_ID.r2.cloudflarestorage.com
+  DISCOURSE_S3_REGION: auto
+  DISCOURSE_S3_ACCESS_KEY_ID: "REMPLACER_R2_ACCESS_KEY"
+  DISCOURSE_S3_SECRET_ACCESS_KEY: "REMPLACER_R2_SECRET_KEY"
+  DISCOURSE_S3_BUCKET: atelierhifi-uploads
+  DISCOURSE_S3_BACKUP_BUCKET: atelierhifi-backups
+  DISCOURSE_BACKUP_LOCATION: s3
+  # Domaine public du bucket (R2 > Settings > Public access > custom domain).
+  # Sans ça les images sortent sur une URL r2.cloudflarestorage.com moche
+  # et non cacheable correctement.
+  DISCOURSE_S3_CDN_URL: https://cdn.atelierhifi.fr
+
+  ## --- Divers ----------------------------------------------------------
+  # Limite la taille des uploads (en Ko). 15 Mo : large pour des photos
+  # d'atelier, assez bas pour éviter les vidéos.
+  DISCOURSE_MAX_IMAGE_SIZE_KB: 15360
+
+volumes:
+  - volume:
+      host: /var/discourse/shared/standalone
+      guest: /shared
+  - volume:
+      host: /var/discourse/shared/standalone/log/var-log
+      guest: /var/log
+
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          # Plugins officiels uniquement au démarrage. Chaque plugin tiers
+          # est une dette : il peut casser à la prochaine montée de version.
+          # Règle : n'ajoute un plugin que si tu l'as testé sur le staging.
+          - git clone --depth=1 https://github.com/discourse/docker_manager.git
+          # Anti-spam : indispensable dès l'ouverture publique.
+          - git clone --depth=1 https://github.com/discourse/discourse-akismet.git
+          # Champs structurés sur les sujets (marque / modèle / année).
+          # Sert à la fois à la navigation et au balisage schema.org.
+          - git clone --depth=1 https://github.com/discourse/discourse-custom-wizard.git
+
+run:
+  - exec: echo "Discourse — atelierhifi.fr — build $(date -u +%FT%TZ)"
+
+  # Force la locale française sur la base (recherche full-text avec
+  # stemming FR : "enceintes" trouve "enceinte").
+  - exec:
+      cd: $home
+      cmd:
+        - sudo -u postgres psql discourse -c "ALTER DATABASE discourse SET default_text_search_config = 'pg_catalog.french';"

@@ -1,0 +1,79 @@
+---
+/**
+ * Balises meta + données structurées.
+ *
+ * Le canonical est calculé depuis `site` dans astro.config.mjs.
+ * Tu t'es déjà fait avoir sur trouve-tout-conseil avec des canonical
+ * pointant vers un domaine que tu ne possédais pas : ici la valeur
+ * vient d'une seule source, jamais écrite en dur.
+ */
+interface Props {
+  titre: string;
+  description: string;
+  type?: 'website' | 'article';
+  image?: string;
+  datePublication?: Date;
+  dateModification?: Date;
+}
+
+const {
+  titre,
+  description,
+  type = 'website',
+  image = '/og-defaut.png',
+  datePublication,
+  dateModification,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const imageAbsolue = new URL(image, Astro.site).href;
+const titreComplet = `${titre} — Atelier HiFi`;
+
+const schema = type === 'article'
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: titre,
+      description,
+      image: imageAbsolue,
+      url: canonical,
+      datePublished: datePublication?.toISOString(),
+      dateModified: (dateModification ?? datePublication)?.toISOString(),
+      inLanguage: 'fr-FR',
+      author: { '@type': 'Person', name: 'Nathan' },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Atelier HiFi',
+        url: Astro.site?.href,
+      },
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Atelier HiFi',
+      description,
+      url: Astro.site?.href,
+      inLanguage: 'fr-FR',
+    };
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>{titreComplet}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={titre} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageAbsolue} />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:site_name" content="Atelier HiFi" />
+
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="alternate" type="application/rss+xml" title="Atelier HiFi" href="/rss.xml" />
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

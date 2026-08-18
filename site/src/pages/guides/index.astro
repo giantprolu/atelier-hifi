@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const guides = (await getCollection('guides'))
+  .filter((g) => !g.data.brouillon)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Regroupement par rubrique : la structure encode le classement réel
+// de l'atelier (par type de matériel), pas une chronologie de blog.
+const rubriques = [...new Set(guides.map((g) => g.data.rubrique))];
+---
+
+<Base
+  titre="Guides de restauration"
+  description="Tous les guides : remise en état d'enceintes, recap d'amplificateurs, réglage de platines et fabrication de supports."
+>
+  <div class="page entete">
+    <p class="serigraphie">Documentation</p>
+    <h1>Guides</h1>
+    <p class="colonne-texte chapo">
+      Chaque guide part d'une restauration réelle. Les références de pièces
+      sont celles effectivement commandées, les mesures sont celles relevées
+      au banc, et les impasses sont indiquées.
+    </p>
+  </div>
+
+  {rubriques.map((rubrique) => (
+    <section class="page">
+      <div class="filet"><span class="serigraphie">{rubrique}</span></div>
+      <ul class="liste">
+        {guides.filter((g) => g.data.rubrique === rubrique).map((g) => (
+          <li>
+            <a href={`/guides/${g.id}/`} class="ligne">
+              <span class="ligne__titre">{g.data.titre}</span>
+              <span class="ligne__resume">{g.data.resume}</span>
+              <span class="ligne__meta">
+                {g.data.difficulte ?? ''}{g.data.duree ? ` · ${g.data.duree}` : ''}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .entete { padding-block: var(--e-8) var(--e-4); }
+  .chapo { font-size: var(--t-lead); color: var(--ardoise-clair); }
+
+  .liste { list-style: none; margin: 0; padding: 0; }
+  .liste li { border-bottom: 1px solid var(--alu-fonce); }
+
+  .ligne {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "titre meta" "resume meta";
+    gap: 2px var(--e-5);
+    align-items: baseline;
+    padding: var(--e-4) 0;
+    color: var(--ardoise);
+    text-decoration: none;
+  }
+  .ligne:hover { color: var(--ardoise); }
+  .ligne:hover .ligne__titre { text-decoration: underline; text-decoration-color: var(--acier); }
+
+  .ligne__titre {
+    grid-area: titre;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+  }
+  .ligne__resume {
+    grid-area: resume;
+    color: var(--ardoise-clair);
+    font-size: var(--t-legende);
+  }
+  .ligne__meta {
+    grid-area: meta;
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    color: var(--ardoise-voile);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px) {
+    .ligne {
+      grid-template-columns: 1fr;
+      grid-template-areas: "titre" "resume" "meta";
+    }
+  }
+</style>

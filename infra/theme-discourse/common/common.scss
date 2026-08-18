@@ -1,0 +1,245 @@
+// =========================================================================
+//  Atelier HiFi — mapping vers le schéma de couleurs Discourse
+//  À poser dans le thème : common/color_definitions.scss + about.json
+//
+//  Principe : Discourse ne reçoit que des valeurs qu'il peut dériver sans
+//  se casser. Tout token qui ne survit pas à dark-light-diff() ou
+//  scale-color() est remplacé ici, et la raison est notée.
+// =========================================================================
+
+// -------------------------------------------------------------------------
+//  1. SCHÉMA CLAIR   « Atelier HiFi — clair »
+// -------------------------------------------------------------------------
+//  var                  valeur     token d'origine        note
+//  $primary             #22262b    --ardoise              tel quel
+//  $secondary           #f0f1ee    --papier               PAS --alu (voir A)
+//  $tertiary            #2a6280    --acier (nouveau)      PAS --temoin (B)
+//  $quaternary          #6b4326    --noyer                sous conditions (C)
+//  $highlight           #f6dfae    --temoin-voile         tel quel
+//  $danger              #a03328    nouveau                (D)
+//  $success             #2b7248    nouveau                (D)
+//  $love                #b8453a    nouveau                (D)
+//  $header_background   #22262b    --ardoise              (E)
+//  $header_primary      #f0f1ee    --papier               (E)
+//  $selected            #e6e8e4    --papier-survol
+//  $hover               #e6e8e4    --papier-survol
+//
+//  $primary/$secondary = 13.38:1. L'écart est franc, toutes les nuances
+//  dérivées (primary-low, primary-medium, primary-high…) restent lisibles.
+
+// -------------------------------------------------------------------------
+//  2. SCHÉMA SOMBRE   « Atelier HiFi — sombre »
+// -------------------------------------------------------------------------
+//  $primary             #f0f1ee
+//  $secondary           #22262b    (pas #14171a : voir F)
+//  $tertiary            #6fb4d4
+//  $quaternary          #c08a5e
+//  $highlight           #6d5520
+//  $danger              #e3705f
+//  $success             #5fbc85
+//  $love                #e8887a
+//  $header_background   #14171a
+//  $header_primary      #f0f1ee
+//  $selected            #2b3037
+//  $hover               #2b3037
+
+// -------------------------------------------------------------------------
+//  NOTES — les six cas où un token ne convient pas tel quel
+// -------------------------------------------------------------------------
+//
+//  (A) --alu #dcdeda ne peut pas être $secondary.
+//      Discourse éclaircit $secondary pour les fonds de ligne alternés et
+//      les surfaces surélevées. #dcdeda n'a presque plus de marge vers le
+//      blanc : les nuances dérivées se confondent, et le gris froid de la
+//      page devient sale dès qu'il est assombri pour les séparateurs.
+//      → $secondary = --papier #f0f1ee. L'aluminium revient par une
+//        variable de thème appliquée aux bandeaux (voir §3), ce qui
+//        reproduit la lecture du site : page alu, contenu papier.
+//
+//  (B) --temoin #e09a2b ne peut pas être $tertiary.
+//      Deux raisons. Contraste : 2.09:1 sur $secondary clair, donc tout
+//      lien serait sous le seuil AA. Sémantique : $tertiary est décliné par
+//      Discourse sur les boutons, les liens visités, les fonds de
+//      notification et les badges — l'ambre se répandrait sur des dizaines
+//      de nuances et perdrait sa valeur de signal en une seule page.
+//      → $tertiary = --acier #2a6280 / #6fb4d4.
+//      L'ambre ne subsiste que comme $highlight (surlignage de recherche,
+//      où il est un aplat portant du texte ardoise) et comme variable de
+//      thème pour le filet d'un sujet non lu.
+//
+//  (C) --noyer #6b4326 en $quaternary : acceptable, mais surveillé.
+//      Discourse s'en sert peu (graphiques d'administration, accents
+//      secondaires) et jamais pour du texte courant. C'est le seul emploi
+//      où le noyer porte autre chose qu'une arête, et il est confiné à des
+//      écrans que les lecteurs ne voient pas. Sur le sombre il doit être
+//      éclairci en #c08a5e sans quoi il disparaît sur $secondary.
+//
+//  (D) $danger, $success, $love n'existaient pas dans la palette.
+//      Ils sont désaturés pour rester dans le monde alu/noyer : rouge de
+//      minium (#a03328), vert d'oxyde (#2b7248), rouge sourd pour le
+//      « j'aime » (#b8453a). Aucun des trois ne s'approche de la teinte du
+//      témoin, ce qui préserve la frontière : l'ambre qualifie une donnée
+//      ou un état, le danger une action ou un échec.
+//
+//  (E) $header_background identique sur les deux schémas (#22262b clair,
+//      #14171a sombre) : l'en-tête ardoise du site est l'élément qui fait
+//      lire les deux surfaces comme un seul produit. Il ne s'éclaircit
+//      jamais.
+//
+//  (F) En sombre, $secondary = #22262b et non #14171a.
+//      Discourse assombrit $secondary pour les creux ; partir de #14171a
+//      donnerait des surfaces quasi noires indistinguables. #14171a est
+//      réservé au fond de page et à l'en-tête.
+
+// -------------------------------------------------------------------------
+//  3. Variables de thème — ce que Discourse ne dérive pas
+// -------------------------------------------------------------------------
+
+:root {
+  --at-alu:          #{dark-light-choose(#dcdeda, #1a1d21)};
+  --at-alu-fonce:    #{dark-light-choose(#c3c7c1, #3a4149)};
+  --at-voile:        #{dark-light-choose(#565e67, #9aa2ab)};
+  --at-noyer:        #{dark-light-choose(#6b4326, #c08a5e)};
+  --at-temoin:       #e09a2b;
+  --at-rayon:        2px;
+  --at-arete:        3px;
+  --at-cible:        44px;
+
+  --at-f-display:    Archivo, "Helvetica Neue", Helvetica, sans-serif;
+  --at-f-corps:      "IBM Plex Sans", system-ui, sans-serif;
+  --at-f-data:       "IBM Plex Mono", ui-monospace, monospace;
+}
+
+// -------------------------------------------------------------------------
+//  4. Corrections d'assiette — Discourse arrondit et adoucit par défaut
+// -------------------------------------------------------------------------
+
+.btn, .badge-category__wrapper, .topic-list, input, textarea, select,
+.d-modal .modal-inner-container, .avatar, .badge-notification {
+  border-radius: var(--at-rayon) !important;
+  box-shadow: none !important;
+}
+
+.avatar { border-radius: 0 !important; }   // vignettes carrées, pas de pastilles
+
+// -------------------------------------------------------------------------
+//  5. Typographie
+// -------------------------------------------------------------------------
+
+body { font-family: var(--at-f-corps); }
+
+h1, h2, h3, .title, .category-heading h1 {
+  font-family: var(--at-f-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.btn {
+  font-family: var(--at-f-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  min-height: var(--at-cible);
+}
+
+// Chiffres, références, mesures : toujours en mono.
+.topic-list .posts,
+.topic-list .views,
+.topic-list .age,
+.topic-list .num,
+.post-info .post-date,
+.trust-level,
+.badge-posts { font-family: var(--at-f-data); letter-spacing: 0.02em; }
+
+// -------------------------------------------------------------------------
+//  6. En-tête : l'arête de noyer, signature commune aux deux surfaces
+// -------------------------------------------------------------------------
+
+.d-header {
+  border-bottom: var(--at-arete) solid var(--at-noyer);
+  box-shadow: none;
+}
+
+// -------------------------------------------------------------------------
+//  7. Liste de sujets — filets, pas de cartes
+// -------------------------------------------------------------------------
+
+.topic-list {
+  border: 1px solid $primary;
+  border-collapse: separate;
+
+  th {
+    background: var(--at-alu-fonce);
+    border-bottom: 1px solid $primary;
+    font-family: var(--at-f-data);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $primary;
+  }
+
+  tr.topic-list-item {
+    border-bottom: 1px solid var(--at-alu-fonce);
+    border-left: var(--at-arete) solid transparent;
+
+    &:hover { background: $hover; }
+    &.visited .title { color: $primary; }
+  }
+
+  // Non lu et épinglé : le seul emploi de l'ambre dans la liste.
+  tr.topic-list-item.unread,
+  tr.topic-list-item.pinned { border-left-color: var(--at-temoin); }
+
+  .topic-excerpt { color: var(--at-voile); }
+}
+
+// Focus clavier visible partout, sur la ligne entière.
+.topic-list-item a.title:focus-visible {
+  outline: 2px solid $tertiary;
+  outline-offset: 2px;
+}
+
+// -------------------------------------------------------------------------
+//  8. Liens et boutons — le bleu-acier sans aplat
+// -------------------------------------------------------------------------
+
+a, .topic-list .title {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.btn-primary {                       // ardoise, libellé clair
+  background: $primary;
+  color: $secondary;
+  border: 1px solid $primary;
+  &:hover { background: scale-color($primary, $lightness: 12%); }
+}
+
+.btn-default {                       // contour, fond papier
+  background: $secondary;
+  color: $primary;
+  border: 1px solid $primary;
+  &:hover { background: $hover; }
+}
+
+.btn-flat {                          // discret, acier
+  background: transparent;
+  color: $tertiary;
+  border: 1px solid transparent;
+  &:hover { border-color: $tertiary; background: transparent; }
+}
+
+// -------------------------------------------------------------------------
+//  9. Cibles tactiles — 44px, y compris sur les contrôles compacts
+// -------------------------------------------------------------------------
+
+.topic-list-item .topic-list-data > a,
+.post-controls .btn,
+.nav-pills > li > a,
+.select-kit .select-kit-header { min-height: var(--at-cible); }
+
+@media (max-width: 767px) {
+  .topic-list-item { padding-block: 4px; }         // 44px effectifs par ligne
+  .topic-list .num.posts { font-size: 0.9375rem; } // le compteur reste lisible
+}

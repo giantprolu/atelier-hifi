@@ -1,0 +1,36 @@
+{
+  "name": "Atelier HiFi",
+  "component": false,
+  "authors": "Atelier HiFi",
+  "about_url": "https://atelierhifi.fr/",
+  "color_schemes": {
+    "Atelier HiFi — clair": {
+      "primary": "22262b",
+      "secondary": "f0f1ee",
+      "tertiary": "2a6280",
+      "quaternary": "6b4326",
+      "highlight": "f6dfae",
+      "danger": "a03328",
+      "success": "2b7248",
+      "love": "b8453a",
+      "header_background": "22262b",
+      "header_primary": "f0f1ee",
+      "selected": "e6e8e4",
+      "hover": "e6e8e4"
+    },
+    "Atelier HiFi — sombre": {
+      "primary": "f0f1ee",
+      "secondary": "22262b",
+      "tertiary": "6fb4d4",
+      "quaternary": "c08a5e",
+      "highlight": "6d5520",
+      "danger": "e3705f",
+      "success": "5fbc85",
+      "love": "e8887a",
+      "header_background": "14171a",
+      "header_primary": "f0f1ee",
+      "selected": "2b3037",
+      "hover": "2b3037"
+    }
+  }
+}

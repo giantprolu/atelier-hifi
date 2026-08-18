@@ -1,0 +1,123 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const fiches = (await getCollection('fiches')).filter((f) => !f.data.brouillon);
+
+// Regroupement par marque, marques triées alphabétiquement. C'est l'entrée
+// naturelle : on cherche « Siare » avant de chercher « enceinte deux voies ».
+const marques = [...new Set(fiches.map((f) => f.data.plaque.marque))].sort(
+  (a, b) => a.localeCompare(b, 'fr'),
+);
+
+const parMarque = marques.map((marque) => ({
+  marque,
+  modeles: fiches
+    .filter((f) => f.data.plaque.marque === marque)
+    .sort((a, b) => a.data.plaque.modele.localeCompare(b.data.plaque.modele, 'fr')),
+}));
+---
+
+<Base
+  titre="Fiches matériel"
+  description="Caractéristiques relevées, haut-parleurs d'origine, pièces d'usure et points de vigilance pour le matériel hi-fi français des années 60 à 80."
+>
+  <div class="page entete">
+    <p class="serigraphie">Le Grenier</p>
+    <h1>Fiches matériel</h1>
+    <p class="colonne-texte chapo">
+      Une fiche par modèle. Les caractéristiques sont relevées sur des
+      exemplaires réels, et chaque fiche indique d'où viennent ses chiffres :
+      une étiquette au dos, une notice d'époque ou un relevé au banc ne se
+      valent pas.
+    </p>
+  </div>
+
+  {fiches.length === 0 ? (
+    <div class="page">
+      <p class="vide colonne-texte">
+        Aucune fiche publiée pour l'instant. La première sera celle des
+        Siare CL240, dès que les valeurs auront été relevées sur
+        l'exemplaire de référence — pas avant.
+      </p>
+    </div>
+  ) : (
+    parMarque.map(({ marque, modeles }) => (
+      <section class="page">
+        <div class="filet"><span class="serigraphie">{marque}</span></div>
+        <ul class="liste">
+          {modeles.map((f) => (
+            <li>
+              <a href={`/fiches/${f.id}/`} class="ligne">
+                <span class="ligne__modele">{f.data.plaque.modele}</span>
+                <span class="ligne__resume">{f.data.resume}</span>
+                <span class="ligne__meta">
+                  {f.data.type}
+                  {f.data.plaque.annees && ` · ${f.data.plaque.annees}`}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  )}
+</Base>
+
+<style>
+  .entete { padding-block: var(--e-8) var(--e-4); }
+  .chapo { font-size: var(--t-lead); color: var(--ardoise-clair); }
+
+  .liste { list-style: none; margin: 0; padding: 0; }
+  .liste li { border-bottom: 1px solid var(--alu-fonce); }
+
+  .ligne {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "modele meta" "resume meta";
+    gap: 2px var(--e-5);
+    align-items: baseline;
+    padding: var(--e-4) 0;
+    color: var(--ardoise);
+    text-decoration: none;
+  }
+  .ligne:hover { color: var(--ardoise); }
+  .ligne:hover .ligne__modele {
+    text-decoration: underline;
+    text-decoration-color: var(--acier);
+  }
+
+  .ligne__modele {
+    grid-area: modele;
+    font-family: var(--f-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--t-lead);
+  }
+  .ligne__resume {
+    grid-area: resume;
+    color: var(--ardoise-clair);
+    font-size: var(--t-legende);
+  }
+  .ligne__meta {
+    grid-area: meta;
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    color: var(--ardoise-voile);
+    white-space: nowrap;
+  }
+
+  .vide {
+    padding: var(--e-6);
+    border: 1px dashed var(--alu-fonce);
+    color: var(--ardoise-voile);
+  }
+
+  @media (max-width: 560px) {
+    .ligne {
+      grid-template-columns: 1fr;
+      grid-template-areas: "modele" "resume" "meta";
+    }
+  }
+</style>

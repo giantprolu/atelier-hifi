@@ -1,0 +1,149 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const guides = (await getCollection('guides'))
+  .filter((g) => !g.data.brouillon)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const recents = guides.slice(0, 4);
+
+const FORUM = 'https://forum.atelierhifi.fr';
+---
+
+<Base
+  titre="Restauration d'enceintes et d'électroniques françaises"
+  description="Guides de restauration, fiches techniques et plans de fabrication pour le matériel hi-fi français des années 60 à 80. Siare, Cabasse, Elipson, Audax, Supravox."
+>
+  <!-- Le héros n'est pas un slogan : c'est une plaque signalétique, l'objet
+       que le visiteur cherchait déjà quand il a atterri ici. -->
+  <section class="page hero">
+    <p class="serigraphie hero__eyebrow">Atelier — Nantes</p>
+    <h1 class="hero__titre">Le matériel français des années 70 n'est pas mort.</h1>
+    <!-- La chute sort du h1 : en capitales à 0.14em, deux phrases
+         occupaient tout l'écran. Elle passe en mono sous le titre, même
+         hiérarchie que l'image de partage. -->
+    <p class="hero__chute">Il a juste besoin de condensateurs neufs.</p>
+    <p class="hero__chapo colonne-texte">
+      Des guides de remise en état écrits à partir de vraies restaurations,
+      avec les mesures, les références de pièces et les erreurs commises en
+      chemin. Plus un forum pour les cas que personne n'a documentés.
+    </p>
+    <div class="hero__actions">
+      <a href="/guides/" class="bouton bouton--vif">Lire les guides</a>
+      <a href={FORUM} class="bouton">
+        Rejoindre le forum
+      </a>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="filet"><span class="serigraphie">Derniers guides</span></div>
+
+    {recents.length === 0 ? (
+      <p class="vide">
+        Aucun guide publié pour l'instant. Le premier arrive avec la
+        restauration des Siare CL240.
+      </p>
+    ) : (
+      <ul class="grille">
+        {recents.map((guide) => (
+          <li class="carte">
+            <a href={`/guides/${guide.id}/`} class="carte__lien">
+              <span class="serigraphie carte__rubrique">{guide.data.rubrique}</span>
+              <h2 class="carte__titre">{guide.data.titre}</h2>
+              <p class="carte__resume">{guide.data.resume}</p>
+              <span class="carte__meta">
+                {guide.data.date.toLocaleDateString('fr-FR', {
+                  year: 'numeric',
+                  month: 'long',
+                })}
+                {guide.data.duree && ` · ${guide.data.duree}`}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <section class="page">
+    <div class="filet"><span class="serigraphie">Outils</span></div>
+    <div class="colonne-texte">
+      <h2>Configurateur de supports</h2>
+      <p>
+        Tu saisis les dimensions de tes enceintes et leur masse, l'outil sort
+        le plan de découpe, la nomenclature des tubes et un SVG coté prêt à
+        emmener chez le métallier.
+      </p>
+      <p><a href="/supports/" class="bouton">Ouvrir le configurateur</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding-block: var(--e-9) var(--e-8); }
+  .hero__eyebrow { margin: 0 0 var(--e-4); }
+  /* Pas de clamp maison : --t-d1 est déjà fluide de 28 à 48px.
+     La mesure est large (24ch) parce qu'en capitales à 0.14em un « ch »
+     vaut bien plus que dans le corps de texte : à 20ch, l'accroche
+     partait sur neuf lignes. */
+  .hero__titre { max-width: 26ch; margin-bottom: var(--e-4); }
+
+  .hero__chute {
+    font-family: var(--f-data);
+    font-size: var(--t-lead);
+    letter-spacing: var(--ls-data);
+    color: var(--ardoise-voile);
+    margin-bottom: var(--e-6);
+  }
+  .hero__chapo {
+    font-size: var(--t-lead);
+    color: var(--ardoise-clair);
+    margin-bottom: var(--e-6);
+  }
+  .hero__actions { display: flex; gap: var(--e-4); flex-wrap: wrap; }
+
+  .grille {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1px;
+    background: var(--alu-fonce);
+    border: 1px solid var(--alu-fonce);
+  }
+
+  .carte { background: var(--papier); }
+  /* La carte entière est le lien : elle reprend l'encre du texte, sinon
+     tout le bloc vire au bleu-acier. Le survol porte le signal. */
+  .carte__lien {
+    display: block;
+    padding: var(--e-5);
+    height: 100%;
+    color: var(--ardoise);
+    text-decoration: none;
+    transition: background 140ms ease;
+  }
+  .carte__lien:hover { background: var(--papier-survol); color: var(--ardoise); }
+  .carte__lien:hover .carte__titre { color: var(--acier); }
+  .carte__rubrique { display: block; margin-bottom: var(--e-3); }
+  .carte__titre { font-size: var(--t-d3); margin-bottom: var(--e-3); }
+  .carte__resume {
+    color: var(--ardoise-clair);
+    font-size: var(--t-legende);
+    margin-bottom: var(--e-4);
+  }
+  .carte__meta {
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    color: var(--ardoise-voile);
+  }
+
+  .vide {
+    padding: var(--e-6);
+    border: 1px dashed var(--alu-fonce);
+    color: var(--ardoise-voile);
+  }
+</style>

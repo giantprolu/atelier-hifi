@@ -1,0 +1,313 @@
+---
+import SEO from '../components/SEO.astro';
+import '../styles/global.css';
+
+interface Props {
+  titre: string;
+  description: string;
+  type?: 'website' | 'article';
+  datePublication?: Date;
+  dateModification?: Date;
+}
+
+const { titre, description, type, datePublication, dateModification } = Astro.props;
+
+const FORUM = 'https://forum.atelierhifi.fr';
+
+const nav = [
+  { libelle: 'Guides', href: '/guides/' },
+  { libelle: 'Fiches matériel', href: '/fiches/' },
+  { libelle: 'Configurateur', href: '/supports/' },
+  { libelle: 'Forum', href: FORUM, externe: true },
+];
+
+// L'état actif se déduit de l'URL : pas de prop à passer depuis chaque
+// page, donc pas de page qui oublie de la passer.
+const ici = Astro.url.pathname;
+const actif = (href: string, externe?: boolean) =>
+  !externe && (href === '/' ? ici === '/' : ici.startsWith(href));
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <SEO
+      titre={titre}
+      description={description}
+      type={type}
+      datePublication={datePublication}
+      dateModification={dateModification}
+    />
+  </head>
+  <body>
+    <a href="#contenu" class="evitement">Aller au contenu</a>
+
+    <header class="entete">
+      <div class="entete__barre">
+        <div class="entete__gauche">
+          <a href="/" class="marque">Atelier HiFi</a>
+
+          <nav class="nav" aria-label="Navigation principale">
+          <ul class="nav__liste">
+            {nav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class:list={['nav__lien', { 'nav__lien--actif': actif(item.href, item.externe) }]}
+                  aria-current={actif(item.href, item.externe) ? 'page' : undefined}
+                >
+                  {item.libelle}
+                </a>
+              </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+
+        <button
+          type="button"
+          class="bascule"
+          id="bascule-menu"
+          aria-expanded="false"
+          aria-controls="menu-replie"
+        >
+          <span class="visuellement-cache">Menu</span>
+          <span class="bascule__barres" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span class="bascule__croix" aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="menu" id="menu-replie" hidden>
+        <ul class="menu__liste">
+          {nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={['menu__lien', { 'menu__lien--actif': actif(item.href, item.externe) }]}
+                aria-current={actif(item.href, item.externe) ? 'page' : undefined}
+              >
+                {item.libelle}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </header>
+
+    <main id="contenu">
+      <slot />
+    </main>
+
+    <footer class="pied">
+      <div class="page pied__interieur">
+        <p class="serigraphie pied__ligne">
+          Atelier HiFi — restauration d'enceintes et d'électroniques françaises
+        </p>
+        <ul class="pied__liens">
+          <li><a href="/mentions-legales/">Mentions légales</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+          <li><a href={FORUM}>Forum</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const bascule = document.getElementById('bascule-menu');
+      const menu = document.getElementById('menu-replie');
+
+      if (bascule && menu) {
+        const fermer = () => {
+          bascule.setAttribute('aria-expanded', 'false');
+          menu.hidden = true;
+        };
+
+        bascule.addEventListener('click', () => {
+          const ouvert = bascule.getAttribute('aria-expanded') === 'true';
+          bascule.setAttribute('aria-expanded', String(!ouvert));
+          menu.hidden = ouvert;
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && bascule.getAttribute('aria-expanded') === 'true') {
+            fermer();
+            bascule.focus();
+          }
+        });
+
+        // Le menu déplié est une vue mobile : si la fenêtre repasse au
+        // format large, la barre horizontale reprend la main et le panneau
+        // doit disparaître, sinon il reste ouvert sous l'en-tête.
+        window.matchMedia('(min-width: 900px)').addEventListener('change', (e) => {
+          if (e.matches) fermer();
+        });
+      }
+    </script>
+
+    <style>
+      .visuellement-cache {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      /* --- En-tête : le panneau d'ardoise et son arête de noyer ---------
+         L'en-tête est l'élément qui fait lire le site et le forum comme un
+         seul produit. Il ne s'éclaircit jamais, dans aucun des deux
+         schémas. */
+
+      .entete {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--panneau);
+        border-bottom: var(--arete) solid var(--noyer);
+      }
+
+      .entete__barre {
+        max-width: var(--page-max);
+        margin-inline: auto;
+        height: 56px;
+        padding-inline: var(--marge);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--e-5);
+      }
+
+      /* Marque et navigation forment un seul groupe à gauche : la nav
+         appartient à la marque, elle ne flotte pas à l'opposé. */
+      .entete__gauche {
+        display: flex;
+        align-items: center;
+        gap: var(--e-6);
+        min-width: 0;
+      }
+
+      .marque {
+        font-family: var(--f-display);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--panneau-texte);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .marque:hover { color: var(--panneau-texte); }
+
+      .nav { display: none; }
+      .nav__liste {
+        display: flex;
+        align-items: center;
+        gap: var(--e-6);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .nav__lien {
+        display: block;
+        padding-block: var(--e-2);
+        font-family: var(--f-display);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--panneau-voile);
+        text-decoration: none;
+        border-bottom: var(--filet-fort) solid transparent;
+        white-space: nowrap;
+      }
+      .nav__lien:hover { color: var(--panneau-texte); text-decoration: none; }
+      .nav__lien--actif {
+        color: var(--panneau-texte);
+        border-bottom-color: var(--acier);
+      }
+
+      /* --- Bascule du menu replié -------------------------------------- */
+
+      .bascule {
+        width: var(--cible);
+        height: var(--cible);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: var(--filet) solid var(--panneau-filet);
+        color: var(--panneau-texte);
+        cursor: pointer;
+      }
+      .bascule__barres { display: flex; flex-direction: column; gap: 4px; }
+      .bascule__barres span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: var(--panneau-texte);
+      }
+      .bascule__croix { display: none; font-family: var(--f-data); font-size: 18px; }
+
+      .bascule[aria-expanded='true'] { border-color: var(--acier); }
+      .bascule[aria-expanded='true'] .bascule__barres { display: none; }
+      .bascule[aria-expanded='true'] .bascule__croix { display: block; }
+
+      .menu { background: var(--panneau-haut); }
+      .menu__liste { list-style: none; margin: 0; padding: 0; }
+      .menu__lien {
+        display: flex;
+        align-items: center;
+        height: 52px;
+        padding-inline: var(--marge);
+        font-family: var(--f-display);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--panneau-texte);
+        text-decoration: none;
+        border-top: var(--filet) solid var(--panneau-filet);
+        border-left: var(--arete) solid transparent;
+      }
+      .menu__lien:hover { color: var(--panneau-texte); background: var(--panneau); }
+      .menu__lien--actif { border-left-color: var(--acier); }
+
+      @media (min-width: 900px) {
+        .entete__barre { height: 64px; }
+        .marque { font-size: 15px; letter-spacing: 0.2em; }
+        .nav { display: block; }
+        .nav__liste { gap: var(--e-6); }
+        .bascule { display: none; }
+        .menu { display: none; }
+      }
+
+      /* --- Pied de page -------------------------------------------------
+         Non spécifié dans la planche : tenu au minimum, un filet et des
+         étiquettes, plutôt que d'inventer un composant qui divergera. */
+
+      .pied {
+        margin-top: var(--e-9);
+        border-top: var(--filet) solid var(--alu-fonce);
+        padding-block: var(--e-6);
+      }
+      .pied__interieur {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--e-5);
+        flex-wrap: wrap;
+      }
+      .pied__ligne { margin: 0; }
+      .pied__liens {
+        display: flex;
+        gap: var(--e-5);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: var(--t-legende);
+      }
+    </style>
+  </body>
+</html>

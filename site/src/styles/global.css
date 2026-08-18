@@ -1,0 +1,565 @@
+/* =========================================================================
+   Atelier HiFi — global.css / tokens
+   Remplace ton global.css. Aucune dépendance, aucun framework.
+
+   Corrections par rapport à la palette de départ (détaillées en bas) :
+   - --ardoise-voile passe de #6d757e à #565e67  (4.09:1 → 5.70:1 sur papier)
+   - ajout de --acier #2a6280 : couleur de lien.  --focus reste #2f6f8f mais
+     ne sert plus qu'à l'anneau de focus (4.04:1 sur alu, suffisant pour un
+     contour, insuffisant pour du texte).
+   - ajout de --danger / --succes / --aime : la palette n'en avait pas et
+     Discourse les exige.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* --- Encres ---------------------------------------------------------- */
+  --ardoise:        #22262b;   /* texte principal, panneaux sombres        */
+  --ardoise-clair:  #3a4149;   /* texte secondaire                        */
+  --ardoise-voile:  #565e67;   /* légendes, métadonnées  (corrigé)        */
+  --ardoise-tenu:   #6d757e;   /* décoratif seul : filets, glyphes désactivés
+                                  — jamais de texte porteur d'information  */
+
+  /* --- Surfaces -------------------------------------------------------- */
+  --alu:            #dcdeda;   /* fond de page, gris froid                */
+  --alu-fonce:      #c3c7c1;   /* filets, séparateurs, en-têtes de tableau */
+  --alu-creux:      #cfd2ce;   /* fond hors-page, champs en creux          */
+  --papier:         #f0f1ee;   /* surfaces de cartes, corps de texte long  */
+  --papier-survol:  #e6e8e4;   /* survol sur papier                        */
+
+  /* --- Surfaces sombres (panneaux, en-têtes, plaques) ------------------ */
+  --panneau:        #22262b;
+  --panneau-haut:   #2b3037;   /* ligne surélevée sur panneau              */
+  --panneau-filet:  #3a4149;
+  --panneau-texte:  #f0f1ee;
+  --panneau-voile:  #9aa2ab;   /* légendes sur sombre — 5.95:1             */
+
+  /* --- Structure ------------------------------------------------------- */
+  --noyer:          #6b4326;   /* ARÊTE UNIQUEMENT : filet 3px sous l'en-tête,
+                                  filet 4px devant un titre de section.
+                                  Jamais de texte, de lien ni de fond.     */
+  --noyer-clair:    #c08a5e;   /* même rôle, sur fond sombre               */
+
+  /* --- Interactif ------------------------------------------------------ */
+  --acier:          #2a6280;   /* liens, boutons tertiaires   5.78:1/papier */
+  --acier-fonce:    #1f4c66;   /* survol de lien                           */
+  --focus:          #2f6f8f;   /* anneau de focus, 2px, offset 2px         */
+
+  /* --- Signal ---------------------------------------------------------- */
+  --temoin:         #e09a2b;   /* états vivants et données hors tolérance.
+                                  Aplat ou filet, jamais du texte sur clair
+                                  (2.09:1). Texte SUR témoin : --ardoise.  */
+  --temoin-voile:   #f6dfae;   /* surlignage de recherche                  */
+  --danger:         #a03328;   /* action destructrice, échec               */
+  --succes:         #2b7248;   /* confirmation                             */
+  --aime:           #b8453a;   /* « j'aime »                               */
+
+  /* --- Trait ----------------------------------------------------------- */
+  --rayon:          2px;
+  --filet:          1px;
+  --filet-fort:     2px;
+  --arete:          3px;       /* filet noyer sous en-tête                 */
+
+  /* --- Typographie ----------------------------------------------------- */
+  --f-display: Archivo, "Helvetica Neue", Helvetica, sans-serif;
+  --f-corps:   "IBM Plex Sans", system-ui, sans-serif;
+  --f-data:    "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Échelle fluide 360px → 1140px */
+  --t-d1:      clamp(1.75rem, 1.10rem + 2.90vw, 3.00rem);  /* 28 → 48 */
+  --t-d2:      clamp(1.375rem, 1.00rem + 1.40vw, 2.00rem); /* 22 → 32 */
+  --t-d3:      clamp(0.9375rem, 0.80rem + 0.50vw, 1.1875rem); /* 15 → 19 */
+  --t-lead:    clamp(1.0625rem, 1.00rem + 0.50vw, 1.3125rem); /* 17 → 21 */
+  --t-corps:   clamp(1.00rem, 0.95rem + 0.25vw, 1.125rem);    /* 16 → 18 */
+  --t-legende: clamp(0.8125rem, 0.78rem + 0.10vw, 0.875rem);  /* 13 → 14 */
+  --t-data:    clamp(0.875rem, 0.83rem + 0.20vw, 1.00rem);    /* 14 → 16 */
+  --t-data-mini: clamp(0.6875rem, 0.67rem + 0.08vw, 0.75rem); /* 11 → 12 */
+  --t-bouton:  clamp(0.8125rem, 0.79rem + 0.10vw, 0.875rem);  /* 13 → 14 */
+
+  --ls-d1: 0.14em;  --lh-d1: 1.08;  --fw-d1: 600;
+  --ls-d2: 0.16em;  --lh-d2: 1.15;  --fw-d2: 600;
+  --ls-d3: 0.18em;  --lh-d3: 1.25;  --fw-d3: 600;
+  --ls-corps: 0;    --lh-corps: 1.65; --fw-corps: 400;
+  --ls-lead: 0;     --lh-lead: 1.55;
+  --ls-data: 0.02em; --lh-data: 1.40; --fw-data: 500;
+  --ls-data-mini: 0.12em;
+  --ls-bouton: 0.14em; --fw-bouton: 600;
+
+  /* --- Espacement : base 4px ------------------------------------------ */
+  --e-1: 4px;  --e-2: 8px;  --e-3: 12px; --e-4: 16px;
+  --e-5: 24px; --e-6: 32px; --e-7: 48px; --e-8: 64px; --e-9: 96px;
+
+  /* --- Grille --------------------------------------------------------- */
+  --page-max:   1140px;
+  --texte-max:  68ch;    /* mesure de lecture des guides */
+  --marge:      16px;    /* ≥390px  */
+  --gouttiere:  16px;
+  --cible:      44px;    /* hauteur tactile minimale, sans exception */
+
+  /* --- Ajouts hors charte ----------------------------------------------
+     Deux tokens en plus, pour éviter des valeurs en dur dans la couche
+     utilitaire :
+     - --panneau-creux : le cadre des plaques et l'ardoise la plus sombre,
+       que la planche emploie en #14171a sans lui donner de nom ;
+     - --vif-actif : l'état actif du bouton primaire. Il ne peut pas être
+       --panneau-creux, parce qu'en schéma sombre le bouton primaire
+       s'inverse (aplat clair) et son état actif doit donc s'éclaircir,
+       pas s'assombrir.                                                   */
+  --panneau-creux:  #14171a;
+  --vif-actif:      #14171a;
+}
+
+@media (min-width: 600px)  { :root { --marge: 24px; --gouttiere: 20px; } }
+@media (min-width: 900px)  { :root { --marge: 32px; --gouttiere: 24px; } }
+@media (min-width: 1140px) { :root { --marge: 40px; } }
+
+/* =========================================================================
+   Schéma sombre — mêmes noms, valeurs permutées.
+   Le sombre n'est pas une inversion : les surfaces se resserrent
+   (#22262b → #2b3037) là où le clair s'écarte (#dcdeda → #f0f1ee).
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --ardoise:       #f0f1ee;
+    --ardoise-clair: #d3d7da;
+    --ardoise-voile: #9aa2ab;
+    --ardoise-tenu:  #6d757e;
+
+    --alu:           #1a1d21;
+    --alu-fonce:     #3a4149;
+    --alu-creux:     #14171a;
+    --papier:        #22262b;
+    --papier-survol: #2b3037;
+
+    --panneau:       #14171a;
+    --panneau-haut:  #22262b;
+    --panneau-filet: #3a4149;
+    --panneau-texte: #f0f1ee;
+    --panneau-voile: #9aa2ab;
+
+    --noyer:         #c08a5e;
+    --noyer-clair:   #c08a5e;
+
+    --acier:         #6fb4d4;
+    --acier-fonce:   #9bd0e6;
+    --focus:         #6fb4d4;
+
+    --temoin:        #e09a2b;
+    --temoin-voile:  #6d5520;
+    --danger:        #e3705f;
+    --succes:        #5fbc85;
+    --aime:          #e8887a;
+
+    --panneau-creux: #0b0d0f;
+    --vif-actif:     #c3c7c1;
+  }
+}
+
+/* Bascule manuelle : <html data-schema="sombre"> répète le bloc ci-dessus. */
+[data-schema="sombre"] {
+  color-scheme: dark;
+
+  --ardoise:       #f0f1ee;
+  --ardoise-clair: #d3d7da;
+  --ardoise-voile: #9aa2ab;
+  --ardoise-tenu:  #6d757e;
+
+  --alu:           #1a1d21;
+  --alu-fonce:     #3a4149;
+  --alu-creux:     #14171a;
+  --papier:        #22262b;
+  --papier-survol: #2b3037;
+
+  --panneau:       #14171a;
+  --panneau-haut:  #22262b;
+  --panneau-filet: #3a4149;
+  --panneau-texte: #f0f1ee;
+  --panneau-voile: #9aa2ab;
+
+  --noyer:         #c08a5e;
+  --noyer-clair:   #c08a5e;
+
+  --acier:         #6fb4d4;
+  --acier-fonce:   #9bd0e6;
+  --focus:         #6fb4d4;
+
+  --temoin:        #e09a2b;
+  --temoin-voile:  #6d5520;
+  --danger:        #e3705f;
+  --succes:        #5fbc85;
+  --aime:          #e8887a;
+
+  --panneau-creux: #0b0d0f;
+  --vif-actif:     #c3c7c1;
+}
+
+/* =========================================================================
+   Socle
+   ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--alu);
+  color: var(--ardoise);
+  font-family: var(--f-corps);
+  font-size: var(--t-corps);
+  line-height: var(--lh-corps);
+  text-wrap: pretty;
+}
+
+h1, h2, h3 { font-family: var(--f-display); text-transform: uppercase; margin: 0; }
+h1 { font-size: var(--t-d1); font-weight: var(--fw-d1); letter-spacing: var(--ls-d1); line-height: var(--lh-d1); }
+h2 { font-size: var(--t-d2); font-weight: var(--fw-d2); letter-spacing: var(--ls-d2); line-height: var(--lh-d2); }
+h3 { font-size: var(--t-d3); font-weight: var(--fw-d3); letter-spacing: var(--ls-d3); line-height: var(--lh-d3); }
+
+a {
+  color: var(--acier);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover { color: var(--acier-fonce); text-decoration-thickness: 2px; }
+a:visited { color: var(--acier); }
+
+:focus-visible {
+  outline: var(--filet-fort) solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+code, kbd, samp, .data { font-family: var(--f-data); font-size: var(--t-data); letter-spacing: var(--ls-data); }
+
+hr { border: 0; border-top: var(--filet) solid var(--alu-fonce); margin: var(--e-6) 0; }
+
+button, input, select, textarea { font: inherit; border-radius: var(--rayon); }
+
+img { max-width: 100%; height: auto; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* =========================================================================
+   COUCHE UTILITAIRE
+   Ce qui suit ne fait pas partie de la planche : ce sont les classes que
+   les pages Astro consomment, construites à partir des tokens ci-dessus et
+   des composants de la section 06. Aucune valeur en dur.
+   ========================================================================= */
+
+/* --- Mise en page ------------------------------------------------------
+   `.page` est le conteneur (centré, borné à --page-max) ; `.prose` et
+   `.colonne-texte` sont des contenus (bornés à --texte-max). Ne les pose
+   jamais sur le même élément : le margin-inline:auto du conteneur
+   centrerait la mesure étroite du contenu au milieu de l'écran, alors
+   qu'elle doit rester calée à la marge gauche.                          */
+
+.page {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--marge);
+}
+
+.colonne-texte { max-width: var(--texte-max); }
+
+.evitement {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--panneau);
+  color: var(--panneau-texte);
+  padding: var(--e-3) var(--e-4);
+  text-decoration: none;
+}
+.evitement:focus { left: var(--e-4); top: var(--e-4); }
+
+/* --- Sérigraphie : l'étiquette gravée sur la façade --------------------
+   Mono et non Archivo. La planche réserve les capitales Archivo aux
+   titres et aux libellés de boutons ; les étiquettes de panneau, elles,
+   sont des données et passent en Plex Mono.                              */
+
+.serigraphie {
+  font-family: var(--f-data);
+  font-size: var(--t-data-mini);
+  font-weight: 500;
+  letter-spacing: var(--ls-data-mini);
+  text-transform: uppercase;
+  color: var(--ardoise-voile);
+}
+
+/* --- Filet de section : l'arête de noyer, puis l'étiquette, puis le trait
+   Le noyer ne porte jamais de texte — il ne fait que marquer l'entrée.   */
+
+.filet {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  margin-block: var(--e-7) var(--e-5);
+}
+.filet::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 20px;
+  background: var(--noyer);
+}
+.filet::after {
+  content: '';
+  flex: 1;
+  height: var(--filet);
+  background: var(--alu-fonce);
+}
+
+/* --- Boutons : trois niveaux, cible 44px sans exception ---------------- */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: var(--cible);
+  padding: 0 var(--e-5);
+  font-family: var(--f-display);
+  font-size: var(--t-bouton);
+  font-weight: var(--fw-bouton);
+  letter-spacing: var(--ls-bouton);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--rayon);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+
+  /* Secondaire par défaut : contour ardoise sur papier. */
+  background: var(--papier);
+  color: var(--ardoise);
+  border: var(--filet) solid var(--ardoise);
+}
+.bouton:hover { background: var(--papier-survol); color: var(--ardoise); }
+.bouton:active { background: var(--alu-fonce); }
+.bouton[aria-disabled='true'],
+.bouton:disabled {
+  background: var(--alu);
+  color: var(--ardoise-tenu);
+  border-color: var(--alu-fonce);
+  cursor: not-allowed;
+}
+
+/* Primaire : l'aplat prend l'encre et le texte prend le papier. Écrit
+   comme ça, le bouton s'inverse tout seul en schéma sombre — aplat clair
+   sur page sombre — au lieu de disparaître dans le fond de page, comme
+   le fait Discourse avec .btn-primary. */
+.bouton--vif {
+  background: var(--ardoise);
+  color: var(--papier);
+  border-color: var(--ardoise);
+}
+.bouton--vif:hover { background: var(--ardoise-clair); color: var(--papier); }
+.bouton--vif:active { background: var(--vif-actif); }
+
+.bouton--discret {
+  background: transparent;
+  color: var(--acier);
+  border-color: transparent;
+}
+.bouton--discret:hover {
+  background: transparent;
+  color: var(--acier-fonce);
+  border-color: var(--acier);
+}
+.bouton--discret:active { background: var(--acier); color: var(--papier); }
+
+/* --- Témoin ambré ------------------------------------------------------
+   Un carré, pas une pastille : c'est une lampe de façade, elle ne tourne
+   pas et ne pulse pas. Trois emplois seulement — état vivant, valeur hors
+   tolérance, surlignage de recherche — et jamais sur un contrôle
+   cliquable. Un seul témoin visible par écran.                           */
+
+.temoin {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--temoin);
+}
+
+mark, .surlignage {
+  background: var(--temoin-voile);
+  color: var(--ardoise);
+  padding: 0 var(--e-1);
+}
+
+/* --- Encarts : deux tons, jamais trois -------------------------------- */
+
+.encart {
+  border: var(--filet) solid var(--ardoise);
+  border-left: 4px solid var(--temoin);
+  background: var(--papier);
+  padding: var(--e-4) var(--e-5);
+}
+.encart__titre {
+  font-family: var(--f-display);
+  font-size: var(--t-bouton);
+  font-weight: var(--fw-bouton);
+  letter-spacing: var(--ls-bouton);
+  text-transform: uppercase;
+  margin: 0 0 var(--e-2);
+}
+.encart p:last-child { margin-bottom: 0; }
+
+.encart--danger { border-left-color: var(--danger); }
+.encart--danger .encart__titre { color: var(--danger); }
+
+/* --- Tableaux ----------------------------------------------------------
+   En-tête sur aplat alu, valeurs en mono alignées à droite. Sous 640px le
+   tableau pivote : chaque ligne devient un bloc titré et chaque cellule
+   une paire clé/valeur. Aucun défilement horizontal, aucune troncature.  */
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  border: var(--filet) solid var(--ardoise);
+  background: var(--papier);
+  text-align: left;
+}
+.tableau th {
+  background: var(--alu-fonce);
+  border-bottom: var(--filet) solid var(--ardoise);
+  padding: var(--e-2) var(--e-3);
+  font-family: var(--f-data);
+  font-size: var(--t-data-mini);
+  font-weight: 500;
+  letter-spacing: var(--ls-data-mini);
+  text-transform: uppercase;
+  color: var(--ardoise);
+}
+.tableau td {
+  padding: var(--e-3);
+  border-bottom: var(--filet) solid var(--alu-fonce);
+  vertical-align: baseline;
+}
+.tableau tr:last-child td { border-bottom: 0; }
+.tableau .nombre {
+  text-align: right;
+  font-family: var(--f-data);
+  font-size: var(--t-data);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tableau th.nombre { text-align: right; }
+/* La ligne hors tolérance porte le filet ambré, elle seule. */
+.tableau .hors-tolerance { border-left: var(--arete) solid var(--temoin); }
+
+@media (max-width: 640px) {
+  .tableau, .tableau tbody, .tableau tr, .tableau td { display: block; width: 100%; }
+  .tableau thead { display: none; }
+  .tableau tr { border-bottom: var(--filet) solid var(--ardoise); }
+  .tableau tr:last-child { border-bottom: 0; }
+  .tableau td {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--e-3);
+    align-items: baseline;
+    border-bottom: var(--filet) solid var(--alu-fonce);
+  }
+  .tableau td::before {
+    content: attr(data-libelle);
+    font-family: var(--f-data);
+    font-size: var(--t-data-mini);
+    letter-spacing: var(--ls-data-mini);
+    text-transform: uppercase;
+    color: var(--ardoise-voile);
+  }
+  .tableau td:not([data-libelle])::before { content: none; }
+  .tableau td:not([data-libelle]) { display: block; }
+  .tableau .nombre { text-align: right; }
+}
+
+/* --- Prose des guides -------------------------------------------------- */
+
+.prose { max-width: var(--texte-max); }
+.prose p { margin: 0 0 var(--e-4); }
+.prose h2 { margin-top: var(--e-7); margin-bottom: var(--e-4); }
+.prose h3 { margin-top: var(--e-6); margin-bottom: var(--e-3); }
+.prose ul, .prose ol { padding-left: var(--e-5); margin: 0 0 var(--e-4); }
+.prose li { margin-bottom: var(--e-2); }
+.prose blockquote {
+  margin: var(--e-5) 0;
+  padding-left: var(--e-5);
+  border-left: var(--arete) solid var(--noyer);
+  color: var(--ardoise-clair);
+}
+.prose figcaption {
+  font-family: var(--f-data);
+  font-size: var(--t-data-mini);
+  letter-spacing: var(--ls-data-mini);
+  color: var(--ardoise-voile);
+  margin-top: var(--e-2);
+}
+.prose pre {
+  background: var(--panneau);
+  color: var(--panneau-texte);
+  padding: var(--e-4);
+  border-radius: var(--rayon);
+  overflow-x: auto;
+  font-size: var(--t-legende);
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--e-5) 0;
+  font-size: var(--t-legende);
+}
+.prose th, .prose td {
+  padding: var(--e-2) var(--e-3);
+  border-bottom: var(--filet) solid var(--alu-fonce);
+  text-align: left;
+}
+.prose th {
+  font-family: var(--f-data);
+  font-size: var(--t-data-mini);
+  letter-spacing: var(--ls-data-mini);
+  text-transform: uppercase;
+  color: var(--ardoise-voile);
+}
+
+/* =========================================================================
+   Ratios de contraste vérifiés (WCAG 2.1, AA)
+
+   CLAIR
+   ardoise #22262b        sur papier #f0f1ee    13.38:1   ✓ AAA
+   ardoise #22262b        sur alu #dcdeda       11.23:1   ✓ AAA
+   ardoise-clair #3a4149  sur papier            9.11:1    ✓ AAA
+   ardoise-voile #565e67  sur papier            5.70:1    ✓ AA
+   ardoise-voile #565e67  sur alu               4.78:1    ✓ AA
+   acier #2a6280          sur papier            5.78:1    ✓ AA
+   acier #2a6280          sur alu               4.85:1    ✓ AA
+   focus #2f6f8f          sur alu               4.04:1    ✓ AA composant (≥3)
+   danger #a03328         sur papier            6.16:1    ✓ AA
+   succes #2b7248         sur papier            5.12:1    ✓ AA
+   aime #b8453a           sur papier            4.71:1    ✓ AA
+   ardoise sur temoin #e09a2b                   6.41:1    ✓ AA
+   ardoise sur temoin-voile #f6dfae             11.66:1   ✓ AAA
+   temoin #e09a2b         sur papier            2.09:1    ✗ — interdit en texte
+   ardoise-tenu #6d757e   sur papier            4.09:1    ✗ — décoratif seul
+
+   SOMBRE
+   papier-texte #f0f1ee   sur panneau #14171a   16.4:1    ✓ AAA
+   #f0f1ee                sur papier #22262b    13.38:1   ✓ AAA
+   panneau-voile #9aa2ab  sur #22262b           5.95:1    ✓ AA
+   acier #6fb4d4          sur #22262b           6.58:1    ✓ AA
+   acier #6fb4d4          sur #2b3037           5.67:1    ✓ AA
+   temoin #e09a2b         sur #22262b           6.41:1    ✓ AA
+   danger #e3705f         sur #22262b           4.92:1    ✓ AA
+   succes #5fbc85         sur #22262b           6.48:1    ✓ AA
+   noyer-clair #c08a5e    sur #22262b           5.14:1    ✓ AA (arête seule)
+   ========================================================================= */

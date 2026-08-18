@@ -1,0 +1,65 @@
+name: Site — build et déploiement
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/deploy-site.yml']
+  pull_request:
+    paths: ['site/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+
+      # Source unique de vérité pour la version de Node : le .node-version
+      # de la racine, que fnm lit aussi en local. Astro 7 exige >= 22.12.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      # Bloque le merge si un frontmatter ne respecte pas le schéma Zod.
+      # Une rubrique mal orthographiée casse le regroupement de /guides/
+      # silencieusement : autant l'attraper ici.
+      - name: Vérifier les types et le contenu
+        run: npm run check
+
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          retention-days: 7
+
+  # Déploiement : Vercel et Cloudflare Pages savent tous les deux builder
+  # depuis le dépôt sans passer par ce workflow. Le plus simple est de
+  # brancher le dépôt côté plateforme et de laisser ce job servir de
+  # garde-fou sur les PR.
+  #
+  # Si tu préfères piloter depuis GitHub Actions, décommente :
+  #
+  # deploy:
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with: { name: site-dist, path: dist }
+  #     - uses: cloudflare/wrangler-action@v3
+  #       with:
+  #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  #         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  #         command: pages deploy dist --project-name=atelierhifi
